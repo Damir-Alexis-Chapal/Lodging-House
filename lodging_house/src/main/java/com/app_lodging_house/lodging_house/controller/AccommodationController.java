@@ -14,6 +14,15 @@ import org.springframework.web.bind.annotation.*;
 @Tag(name = "Accommodations", description = "Operations related to hostings management")
 // ↑ This will gather all endpoints in this class as "Accommodations" in Swagger
 public class AccommodationController {
+    //All endpoints return a String ResponseEntity, I made it like this since those endpoints have
+    //not the real logic and are just examples
+    //------------------------------------------------------------------------------------------------------------------
+    /* Response codes used in this controller
+    201 Created → accommodation created successfully.
+    200 OK → operation successful (get, update, delete, search, filter).
+    400 Bad Request → invalid data.
+    404 Not Found → accommodation not found or no results.
+    500 Internal Server Error → unexpected error.*/
     //------------------------------------------------------------------------------------------------------------------
     // ENDPOINT 1: ADD accommodation
     @Operation(summary = "Add a new accommodation")

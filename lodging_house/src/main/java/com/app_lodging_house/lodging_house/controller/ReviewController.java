@@ -13,6 +13,17 @@ import org.springframework.web.bind.annotation.*;
 @Tag(name = "Reviews", description = "Operations related to reviews management")
 // ↑ This will gather all endpoints in this class as "Reviews" in Swagger
 public class ReviewController {
+    //All endpoints return a String ResponseEntity, I made it like this since those endpoints have
+    //not the real logic and are just examples
+    //------------------------------------------------------------------------------------------------------------------
+    /* Response codes used in this controller
+    201 Created → when creating a review.
+    200 OK → for GET and PUT that return data.
+    204 No Content → for successful DELETE.
+    400 Bad Request → invalid data (rating out of range, incomplete payload).
+    401 Unauthorized → if the user is not authenticated or is not the owner (must be handled securely).
+    404 Not Found → resource not found (e.g., review or accommodation does not exist in your logic).
+    500 Internal Server Error → unexpected errors.*/
     //------------------------------------------------------------------------------------------------------------------
     // ENDPOINT 1: TO ADD a review
     @Operation(summary = "Add a new review")

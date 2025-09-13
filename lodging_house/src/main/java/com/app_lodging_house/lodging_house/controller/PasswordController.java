@@ -14,6 +14,15 @@ import org.springframework.web.bind.annotation.*;
 @Tag(name = "Passwords", description = "Operations related to passwords management")
 // ↑ This will gather all endpoints in this class as "Passwords" in Swagger
 public class PasswordController {
+    //All endpoints return a String ResponseEntity, I made it like this since those endpoints have
+    //not the real logic and are just examples
+    //------------------------------------------------------------------------------------------------------------------
+    /* Response codes used in this controller
+    200 OK → operation successful.
+    400 Bad Request → invalid data.
+    401 Unauthorized → user not authenticated or invalid token.
+    404 Not Found → email does not exist.
+    500 Internal Server Error → unexpected error.*/
     //------------------------------------------------------------------------------------------------------------------
     // ENDPOINT 1: CHANGE PASSWORD (authenticated user)
     @Operation(summary = "Change password",
@@ -63,5 +72,4 @@ public class PasswordController {
         //I don't even know what a token is, but google give me this example so...
         return new ResponseEntity<>("Password reset successfully", HttpStatus.OK);
     }
-
 }

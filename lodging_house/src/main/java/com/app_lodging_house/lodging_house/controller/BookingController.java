@@ -16,6 +16,15 @@ import java.sql.Date;
 @Tag(name = "Bookings", description = "Operations related to booking management")
 // ↑ This will gather all endpoints in this class as "Bookings" in Swagger
 public class BookingController {
+    //All endpoints return a String ResponseEntity, I made it like this since those endpoints have
+    //not the real logic and are just examples
+    //------------------------------------------------------------------------------------------------------------------
+    /* Response codes used in this controller
+    201 Created → booking created successfully.
+    200 OK → operation successful (get bookings by id, user, accommodation).
+    400 Bad Request → invalid booking data.
+    404 Not Found → booking not found or no results.
+    500 Internal Server Error → unexpected error.*/
     //------------------------------------------------------------------------------------------------------------------
     // ENDPOINT 1: CREATE BOOKING
     @Operation(

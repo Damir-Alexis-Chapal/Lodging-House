@@ -14,6 +14,14 @@ import org.springframework.web.bind.annotation.*;
 @Tag(name = "Auth", description = "Operations related to user authentication and sessions")
 // ↑ This will gather all endpoints in this class as "Auth" in Swagger
 public class AuthController {
+    //All endpoints return a String ResponseEntity, I made it like this since those endpoints have
+    //not the real logic and are just examples
+    //------------------------------------------------------------------------------------------------------------------
+    /* Response codes used in this controller
+    200 OK → operation successful (login, logout, refresh, get current user).
+    400 Bad Request → invalid login data.
+    401 Unauthorized → invalid credentials, expired token, or user not authenticated.
+    500 Internal Server Error → unexpected error.*/
     //------------------------------------------------------------------------------------------------------------------
     // ENDPOINT 1: LOGIN
     @Operation(
