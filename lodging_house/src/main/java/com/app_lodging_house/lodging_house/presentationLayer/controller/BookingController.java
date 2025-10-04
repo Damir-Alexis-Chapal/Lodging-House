@@ -1,4 +1,4 @@
-package com.app_lodging_house.lodging_house.controller;
+package com.app_lodging_house.lodging_house.presentationLayer.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
