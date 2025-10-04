@@ -41,6 +41,9 @@ public class AccommodationEntity {
     @Column(name = "max_capacity", nullable = false)
     private int maxCapacity;
 
+    @Column(name = "is_available", nullable = false)
+    private boolean isAvailable;
+
     @ManyToOne
     @JoinColumn(name = "owner_id", nullable = false)
     private UserEntity user;
