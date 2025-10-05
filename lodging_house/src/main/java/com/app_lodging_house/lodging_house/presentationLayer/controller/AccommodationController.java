@@ -1,16 +1,26 @@
 package com.app_lodging_house.lodging_house.presentationLayer.controller;
 
+import com.app_lodging_house.lodging_house.bussinessLayer.dto.AccommodationCreateDTO;
+import com.app_lodging_house.lodging_house.bussinessLayer.dto.AccommodationDTO;
+import com.app_lodging_house.lodging_house.bussinessLayer.service.AccommodationService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.persistence.EntityNotFoundException;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/v1/accommodations")
+@RequiredArgsConstructor
+@Slf4j
 @Tag(name = "Accommodations", description = "Operations related to hostings management")
 // ↑ This will gather all endpoints in this class as "Accommodations" in Swagger
 public class AccommodationController {
@@ -24,6 +34,7 @@ public class AccommodationController {
     404 Not Found → accommodation not found or no results.
     500 Internal Server Error → unexpected error.*/
     //------------------------------------------------------------------------------------------------------------------
+    private final AccommodationService accommodationService;
     // ENDPOINT 1: ADD accommodation
     @Operation(summary = "Add a new accommodation")
     @ApiResponses(value = {
@@ -32,13 +43,15 @@ public class AccommodationController {
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
     @PostMapping
-    public ResponseEntity<String> addAccommodation(
-            @Parameter(description = "Accommodation name", example = "Beach House") @RequestParam String name,
-            @Parameter(description = "City where the accommodation is located", example = "Cartagena") @RequestParam String city,
-            @Parameter(description = "Price per night", example = "120") @RequestParam double price,
-            @Parameter(description = "Maximum number of guests", example = "4") @RequestParam int maxGuests) {
-        //This is just an example,it's not the real logic, we will need some more parameters to create a new accommodation
-        return new ResponseEntity<>("Accommodation created successfully", HttpStatus.CREATED);
+    public ResponseEntity<AccommodationDTO> addAccommodation(
+            @Parameter(description = "Accommodation data that we need to create a new Accommodation", required = true)
+            @RequestBody AccommodationCreateDTO dto) {
+        try {
+            AccommodationDTO createdAccommodation = accommodationService.createAccommodation(dto);
+            return ResponseEntity.status(HttpStatus.CREATED).body(createdAccommodation);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().build();
+        }
     }
     //------------------------------------------------------------------------------------------------------------------
     // ENDPOINT 2: UPDATE accommodation
@@ -50,14 +63,19 @@ public class AccommodationController {
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
     @PutMapping("/{id}")
-    public ResponseEntity<String> updateAccommodation(
-            @Parameter(description = "Accommodation ID", example = "1") @PathVariable long id,
-            @Parameter(description = "Updated name", example = "Luxury Beach House") @RequestParam String name,
-            @Parameter(description = "Updated price", example = "150") @RequestParam double price,
-            @Parameter(description = "Updated max guests", example = "6") @RequestParam int maxGuests) {
-        //This is just an example,it's not the real logic
-        return new ResponseEntity<>("Accommodation updated successfully", HttpStatus.OK);
+    public ResponseEntity<AccommodationDTO> updateAccommodation(
+            @PathVariable Long id,
+            @RequestBody AccommodationCreateDTO dto) {
+        try {
+            AccommodationDTO updatedAccommodation = accommodationService.updateAccommodation(id, dto);
+            return ResponseEntity.ok(updatedAccommodation);
+        } catch (EntityNotFoundException e) {
+            return ResponseEntity.notFound().build();
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().build();
+        }
     }
+
     //------------------------------------------------------------------------------------------------------------------
     // ENDPOINT 3: GET by ID
     @Operation(summary = "Get accommodation by ID")
@@ -67,11 +85,17 @@ public class AccommodationController {
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
     @GetMapping("/{id}")
-    public ResponseEntity<String> getAccommodationById(
+    public ResponseEntity<AccommodationDTO> getAccommodationById(
             @Parameter(description = "Accommodation ID", example = "1") @PathVariable long id) {
 
-        //This is just an example,it's not the real logic
-        return new ResponseEntity<>("Accommodation found", HttpStatus.OK);
+        try {
+            AccommodationDTO accommodation = accommodationService.getAccommodationById(id);
+            return ResponseEntity.ok(accommodation);
+        } catch (EntityNotFoundException e) {
+            return ResponseEntity.notFound().build();
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().build();
+        }
     }
     //------------------------------------------------------------------------------------------------------------------
     // ENDPOINT 4: GET all
@@ -81,9 +105,9 @@ public class AccommodationController {
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
     @GetMapping
-    public ResponseEntity<String> getAllAccommodations() {
-        //This is just an example,it's not the real logic
-        return new ResponseEntity<>("List of accommodations returned", HttpStatus.OK);
+    public ResponseEntity<List<AccommodationDTO>> getAllAccommodations() {
+        List<AccommodationDTO> accommodationDTOS = accommodationService.getAllAccommodations();
+        return ResponseEntity.ok(accommodationDTOS);
     }
     //------------------------------------------------------------------------------------------------------------------
     // ENDPOINT 5: SEARCH by name or city

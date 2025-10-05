@@ -4,11 +4,13 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@Getter
 @Schema(description = "DTO used to create a new accommodation")
 public class AccommodationCreateDTO {
 
@@ -30,7 +32,7 @@ public class AccommodationCreateDTO {
     private Integer maxCapacity;
 
     @Schema(description = "Whether the place is available or not", example = "true")
-    private Boolean isAvailable = true;
+    private Boolean available = true;
 
     @NotNull(message = "The owner ID is required")
     @Schema(description = "ID of the user who owns the accommodation", example = "1", required = true)

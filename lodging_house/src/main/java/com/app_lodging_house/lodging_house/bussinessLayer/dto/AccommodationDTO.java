@@ -3,6 +3,7 @@ package com.app_lodging_house.lodging_house.bussinessLayer.dto;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.util.Set;
@@ -10,6 +11,7 @@ import java.util.Set;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@Getter
 @Schema(description = "Accommodation info")
 public class AccommodationDTO {
 

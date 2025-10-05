@@ -1,9 +1,7 @@
 package com.app_lodging_house.lodging_house.persistenceLayer.entity;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -20,6 +18,8 @@ import java.util.Set;
 @Entity
 @Table(name = "accommodations")
 @Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 public class AccommodationEntity {

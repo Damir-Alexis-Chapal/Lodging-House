@@ -26,6 +26,6 @@ public class ServicesEntity {
     private String name;
 
     @ManyToMany(mappedBy = "services")
-    private Set<UserEntity> users = new HashSet<>();
+    private Set<AccommodationEntity> users = new HashSet<>();
 
 }
