@@ -75,7 +75,6 @@ public class AccommodationController {
             return ResponseEntity.badRequest().build();
         }
     }
-
     //------------------------------------------------------------------------------------------------------------------
     // ENDPOINT 3: GET by ID
     @Operation(summary = "Get accommodation by ID")
@@ -86,8 +85,7 @@ public class AccommodationController {
     })
     @GetMapping("/{id}")
     public ResponseEntity<AccommodationDTO> getAccommodationById(
-            @Parameter(description = "Accommodation ID", example = "1") @PathVariable long id) {
-
+            @Parameter(description = "Accommodation ID", example = "1", required = true) @PathVariable long id) {
         try {
             AccommodationDTO accommodation = accommodationService.getAccommodationById(id);
             return ResponseEntity.ok(accommodation);
@@ -110,19 +108,18 @@ public class AccommodationController {
         return ResponseEntity.ok(accommodationDTOS);
     }
     //------------------------------------------------------------------------------------------------------------------
-    // ENDPOINT 5: SEARCH by name or city
-    @Operation(summary = "Search accommodations by name or city")
+    // ENDPOINT 5: SEARCH by name
+    @Operation(summary = "Search accommodations by name")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Search results returned"),
             @ApiResponse(responseCode = "404", description = "No accommodations found"),
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
-    @GetMapping("/search")
-    public ResponseEntity<String> searchAccommodations(
-            @Parameter(description = "Accommodation name", example = "Beach") @RequestParam(required = false) String name,
-            @Parameter(description = "City", example = "Cartagena") @RequestParam(required = false) String city) {
-        //This is just an example,it's not the real logic
-        return new ResponseEntity<>("Search results returned", HttpStatus.OK);
+    @GetMapping("/search/{name}")
+    public ResponseEntity<AccommodationDTO> searchAccommodations(
+            @Parameter(description = "Accommodation name", example = "sol brillante") @PathVariable String name) {
+        AccommodationDTO accommodationDTO = accommodationService.getAccommodationByName(name);
+        return ResponseEntity.ok(accommodationDTO);
     }
     //------------------------------------------------------------------------------------------------------------------
     // ENDPOINT 6: FILTER by price range or guests (it's just an example, we will add some more filter options later)
@@ -152,7 +149,13 @@ public class AccommodationController {
     @DeleteMapping("/{id}")
     public ResponseEntity<String> deleteAccommodation(
             @Parameter(description = "Accommodation ID", example = "1") @PathVariable long id) {
-        //This is just an example,it's not the real logic
-        return new ResponseEntity<>("Accommodation deleted successfully", HttpStatus.OK);
+        try {
+            accommodationService.deleteAccommodation(id);
+            return ResponseEntity.ok("The accommodation has been deleted successfully");
+        } catch (EntityNotFoundException e) {
+            return ResponseEntity.notFound().build();
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().build();
+        }
     }
 }

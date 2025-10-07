@@ -1,18 +1,25 @@
 package com.app_lodging_house.lodging_house.presentationLayer.controller;
 
+import com.app_lodging_house.lodging_house.bussinessLayer.dto.BookingCreateDTO;
+import com.app_lodging_house.lodging_house.bussinessLayer.dto.BookingDTO;
+import com.app_lodging_house.lodging_house.bussinessLayer.service.BookingService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.persistence.EntityNotFoundException;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.sql.Date;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/bookings")
+@RequiredArgsConstructor
+@Slf4j
 @Tag(name = "Bookings", description = "Operations related to booking management")
 // ↑ This will gather all endpoints in this class as "Bookings" in Swagger
 public class BookingController {
@@ -26,6 +33,7 @@ public class BookingController {
     404 Not Found → booking not found or no results.
     500 Internal Server Error → unexpected error.*/
     //------------------------------------------------------------------------------------------------------------------
+    private final BookingService bookingService;
     // ENDPOINT 1: CREATE BOOKING
     @Operation(
             summary = "Create a new booking",
@@ -36,13 +44,15 @@ public class BookingController {
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
     @PostMapping
-    public ResponseEntity<String> createBooking(
-            @Parameter(description = "User ID of the booking", example = "1") @RequestParam int userId,
-            @Parameter(description = "Check-in date (yyyy-MM-dd)", example = "2025-09-12") @RequestParam Date dateCheckIn,
-            @Parameter(description = "Check-out date (yyyy-MM-dd)", example = "2025-09-15") @RequestParam Date dateCheckOut,
-            @Parameter(description = "Number of guests", example = "2") @RequestParam int guestsNumber) {
-        //This is just an example,it's not the real logic
-        return new ResponseEntity<>("Booking created successfully", HttpStatus.CREATED);
+    public ResponseEntity<BookingDTO> createBooking(
+            @Parameter(description = "Booking data that we need to create a new Booking", required = true)
+            @RequestBody BookingCreateDTO dto) {
+        try {
+            BookingDTO createdBooking = bookingService.createBooking(dto);
+            return ResponseEntity.status(HttpStatus.CREATED).body(createdBooking);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().build();
+        }
     }
     //------------------------------------------------------------------------------------------------------------------
     // ENDPOINT 2: GET BOOKING BY ID
@@ -53,11 +63,16 @@ public class BookingController {
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
     @GetMapping("/{id}")
-    public ResponseEntity<String> getBookingById(
-            @Parameter(description = "Booking ID", required = true, example = "1")
-            @PathVariable long id) {
-        //This is just an example,it's not the real logic
-        return new ResponseEntity<>("Booking found", HttpStatus.OK);
+    public ResponseEntity<BookingDTO> getBookingById(
+            @Parameter(description = "Booking ID", required = true, example = "1") @PathVariable long id) {
+        try {
+            BookingDTO booking = bookingService.getBookingById(id);
+            return ResponseEntity.ok(booking);
+        } catch (EntityNotFoundException e) {
+            return ResponseEntity.notFound().build();
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().build();
+        }
     }
     //------------------------------------------------------------------------------------------------------------------
     // ENDPOINT 3: GET BOOKINGS BY USER
@@ -69,11 +84,17 @@ public class BookingController {
     })
 
     @GetMapping("/user/{userId}")
-    public ResponseEntity<String> getAllBookingsByUserId(
-            @Parameter(description = "User ID", required = true, example = "1")
-            @PathVariable long userId) {
-        //This is just an example,it's not the real logic
-        return new ResponseEntity<>( "Bookings found", HttpStatus.OK);
+    public ResponseEntity<List<BookingDTO>> getAllBookingsByUserId(
+            @Parameter(description = "User ID", required = true, example = "1") @PathVariable long userId) {
+        try {
+            List<BookingDTO> bookings = bookingService.getByUserId(userId);
+            return ResponseEntity.ok(bookings);
+        } catch (EntityNotFoundException e) {
+            return ResponseEntity.notFound().build();
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().build();
+        }
+
     }
     //------------------------------------------------------------------------------------------------------------------
     // ENDPOINT 4: GET BOOKINGS BY ACCOMMODATION
@@ -84,10 +105,17 @@ public class BookingController {
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
     @GetMapping("/accommodation/{accommodationId}")
-    public ResponseEntity<String> getAllBookingsByAccommodationId(
+    public ResponseEntity<List<BookingDTO>> getAllBookingsByAccommodationId(
             @Parameter(description = "Accommodation ID", required = true, example = "10")
             @PathVariable long accommodationId) {
-        //This is just an example,it's not the real logic
-        return new ResponseEntity<>("Bookings found", HttpStatus.OK);
+        try {
+            List<BookingDTO> bookings = bookingService.getByAccommodationId(accommodationId);
+            return ResponseEntity.ok(bookings);
+        } catch (EntityNotFoundException e) {
+            return ResponseEntity.notFound().build();
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().build();
+        }
     }
+
 }

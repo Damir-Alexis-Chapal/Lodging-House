@@ -1,18 +1,16 @@
 package com.app_lodging_house.lodging_house.bussinessLayer.service.impl;
+
 import com.app_lodging_house.lodging_house.bussinessLayer.dto.AccommodationCreateDTO;
 import com.app_lodging_house.lodging_house.bussinessLayer.dto.AccommodationDTO;
 import com.app_lodging_house.lodging_house.bussinessLayer.service.AccommodationService;
 import com.app_lodging_house.lodging_house.persistenceLayer.dao.AccommodationDAO;
 import com.app_lodging_house.lodging_house.persistenceLayer.entity.AccommodationEntity;
-import com.app_lodging_house.lodging_house.persistenceLayer.entity.UserEntity;
 import com.app_lodging_house.lodging_house.persistenceLayer.mapper.AccommodationMapper;
 import com.app_lodging_house.lodging_house.persistenceLayer.repository.AccommodationRepository;
-import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -46,13 +44,10 @@ public class AccommodationServiceImpl implements AccommodationService {
 
     @Override
     public AccommodationDTO updateAccommodation(Long id, AccommodationCreateDTO dto) {
-        AccommodationEntity existing = accommodationRepository.findById(id)
-                .orElseThrow(() -> new EntityNotFoundException("Accommodation not found with id " + id));
-
+        AccommodationEntity existing = accommodationMapper.dtoToEntity(accommodationDAO.findById(id));
         accommodationMapper.updateEntityFromDto(dto, existing);
-
-        AccommodationEntity updated = accommodationRepository.save(existing);
-        return accommodationMapper.toDTO(updated);
+        AccommodationDTO updated = accommodationDAO.save(accommodationMapper.entityToCreateDTO(existing));
+        return updated;
     }
 
     @Override
@@ -65,6 +60,11 @@ public class AccommodationServiceImpl implements AccommodationService {
         }
         return accommodationDTOS;
 
+    }
+
+    @Override
+    public void deleteAccommodation(Long id) {
+        accommodationDAO.deleteAccommodation(id);
     }
 
 }

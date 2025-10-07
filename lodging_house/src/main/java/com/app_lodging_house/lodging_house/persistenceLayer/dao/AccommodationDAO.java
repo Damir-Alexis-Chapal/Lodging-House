@@ -32,5 +32,9 @@ public class AccommodationDAO {
         return accommodationMapper.toDTO(entity.orElse(null));
     }
 
+    public void deleteAccommodation(Long id) {
+        accommodationRepository.deleteById(id);
+    }
+
 
 }
