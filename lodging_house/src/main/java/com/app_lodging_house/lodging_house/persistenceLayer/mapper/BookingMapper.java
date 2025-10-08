@@ -17,26 +17,22 @@ public class BookingMapper {
     //To DTO from entity
     public BookingDTO toDTO(BookingEntity entity) {
         if (entity == null) return null;
-
         BookingDTO dto = new BookingDTO();
+
         dto.setId(entity.getId());
-        dto.setAccommodationId(
-                entity.getAccommodation() != null ? entity.getAccommodation().getId() : null
-        );
-        dto.setOwnerId(
-                entity.getUser() != null ? entity.getUser().getId() : null
-        );
+        dto.setAccommodationId(entity.getAccommodation().getId());
+        dto.setOwnerId(entity.getUser().getId());
         dto.setDateCheckIn(entity.getDateCheckIn());
         dto.setDateCheckOut(entity.getDateCheckOut());
         dto.setGuestsNumber(entity.getGuestsNumber());
         dto.setStatus(entity.getStatus());
+
         return dto;
     }
 
     //To Entity from createDTo
     public BookingEntity cDtoToEntity(BookingCreateDTO dto) {
         if (dto == null) return null;
-
         BookingEntity entity = new BookingEntity();
 
         AccommodationEntity accommodation = new AccommodationEntity();
@@ -58,7 +54,6 @@ public class BookingMapper {
     //To Entity From DTO
     public BookingEntity toEntity(BookingDTO dto) {
         if (dto == null) return null;
-
         BookingEntity entity = new BookingEntity();
 
         entity.setId(dto.getId());
@@ -79,8 +74,10 @@ public class BookingMapper {
         return entity;
     }
 
+    //To Entity from CreateDTO
     public BookingEntity entityToCreateDTO(BookingCreateDTO dto) {
         BookingEntity entity = new BookingEntity();
+
         entity.setDateCheckIn(dto.getDateCheckIn());
         entity.setDateCheckOut(dto.getDateCheckOut());
         entity.setGuestsNumber(dto.getGuestsNumber());
@@ -95,6 +92,7 @@ public class BookingMapper {
             accommodation.setId(dto.getAccommodationId());
             entity.setAccommodation(accommodation);
         }
+
         return entity;
     }
 }

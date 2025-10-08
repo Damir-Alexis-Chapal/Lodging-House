@@ -7,6 +7,8 @@ import com.app_lodging_house.lodging_house.persistenceLayer.mapper.Accommodation
 import com.app_lodging_house.lodging_house.persistenceLayer.repository.AccommodationRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -34,6 +36,16 @@ public class AccommodationDAO {
 
     public void deleteAccommodation(Long id) {
         accommodationRepository.deleteById(id);
+    }
+
+    public List<AccommodationDTO> getAllAccommodations() {
+        List<AccommodationEntity> accommodationEntities = accommodationRepository.findAll();
+
+        List<AccommodationDTO> accommodationDTOS = new ArrayList<>();
+        for(AccommodationEntity accommodationEntity : accommodationEntities) {
+            accommodationDTOS.add(accommodationMapper.toDTO(accommodationEntity));
+        }
+        return accommodationDTOS;
     }
 
 

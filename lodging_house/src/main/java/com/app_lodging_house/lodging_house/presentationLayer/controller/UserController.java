@@ -1,16 +1,30 @@
 package com.app_lodging_house.lodging_house.presentationLayer.controller;
 
+import com.app_lodging_house.lodging_house.bussinessLayer.dto.AccommodationCreateDTO;
+import com.app_lodging_house.lodging_house.bussinessLayer.dto.AccommodationDTO;
+import com.app_lodging_house.lodging_house.bussinessLayer.dto.UserCreateDTO;
+import com.app_lodging_house.lodging_house.bussinessLayer.dto.UserDTO;
+import com.app_lodging_house.lodging_house.bussinessLayer.service.UserService;
+import com.app_lodging_house.lodging_house.persistenceLayer.entity.UserEntity;
+import com.app_lodging_house.lodging_house.persistenceLayer.repository.UserRepository;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.persistence.EntityNotFoundException;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/v1/users")
+@RequiredArgsConstructor
+@Slf4j
 @Tag(name = "Users", description = "Operations related to users management")
 // ↑ This will gather all endpoints in this class as "Users" in Swagger
 public class UserController {
@@ -25,6 +39,7 @@ public class UserController {
     404 Not Found → When the user doesn't exist.
     500 Internal Server Error → unexpected errors.*/
     //------------------------------------------------------------------------------------------------------------------
+    private final UserService userService;
     // ENDPOINT 1: REGISTER USER
     @Operation(summary = "Register a new user")
     @ApiResponses(value = {
@@ -33,13 +48,16 @@ public class UserController {
             @ApiResponse(responseCode = "409", description = "Email already in use"),
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
-    @PostMapping("/register")
-    public ResponseEntity<String> registerUser(
-            @Parameter(description = "Username", example = "johndoe") @RequestParam String username,
-            @Parameter(description = "Email", example = "johndoe@example.com") @RequestParam String email,
-            @Parameter(description = "Password", example = "123456") @RequestParam String password) {
-        //This is just an example,it's not the real logic, the real users will need some more parameters to be defined
-        return new ResponseEntity<>("User registered successfully", HttpStatus.CREATED);
+    @PostMapping()
+    public ResponseEntity<UserDTO> registerUser(
+            @Parameter(description = "User data that we need to create a new Accommodation", required = true)
+            @RequestBody UserCreateDTO dto) {
+        try {
+            UserDTO createdUser = userService.createUser(dto);
+            return ResponseEntity.status(HttpStatus.CREATED).body(createdUser);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().build();
+        }
     }
     //------------------------------------------------------------------------------------------------------------------
     // ENDPOINT 2: GET by ID
@@ -50,11 +68,15 @@ public class UserController {
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
     @GetMapping("/{id}")
-    public ResponseEntity<String> getUserById(
+    public ResponseEntity<UserDTO> getUserById(
             @Parameter(description = "User ID", required = true, example = "1")
             @PathVariable Long id) {
-        //This is just an example,it's not the real logic
-        return new ResponseEntity<>("User found", HttpStatus.OK);
+        try {
+            UserDTO user = userService.getById(id);
+            return ResponseEntity.ok(user);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().build();
+        }
     }
     //------------------------------------------------------------------------------------------------------------------
     // ENDPOINT 3: GET all users
@@ -64,9 +86,9 @@ public class UserController {
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
     @GetMapping
-    public ResponseEntity<String> getAllUsers() {
-        //This is just an example,it's not the real logic
-        return new ResponseEntity<>("List of users returned", HttpStatus.OK);
+    public ResponseEntity<List<UserDTO>> getAllUsers() {
+        List<UserDTO> users = userService.getAll();
+        return ResponseEntity.ok(users);
     }
     //------------------------------------------------------------------------------------------------------------------
     // ENDPOINT 4: UPDATE user by ID
@@ -78,11 +100,19 @@ public class UserController {
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
     @PutMapping("/{id}")
-    public ResponseEntity<String> updateUSer( @Parameter(description = "User ID",
-                                              required = true, example = "1")
-                                              @RequestParam Long id){
-        //This is just an example,it's not the real logic
-        return new ResponseEntity<>("User updated successfully", HttpStatus.OK);
+    public ResponseEntity<UserDTO> updateUSer(
+            @Parameter(description = "User ID and user data", required = true)
+            @PathVariable Long id,
+            @RequestBody UserCreateDTO dto){
+        try {
+            UserDTO updatedUser = userService.updateUser(id, dto);
+            return ResponseEntity.ok(updatedUser);
+        } catch (EntityNotFoundException e) {
+            return ResponseEntity.notFound().build();
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().build();
+        }
+
     }
     //------------------------------------------------------------------------------------------------------------------
     // ENDPOINT 5: DELETE user by ID
@@ -94,9 +124,16 @@ public class UserController {
     })
     @DeleteMapping("/{id}")
     public ResponseEntity<String> deleteUser(
-            @Parameter(description = "User ID", required = true, example = "1") @PathVariable Long id) {
-        //This is just an example,it's not the real logic
-       return new ResponseEntity<>("User deleted successfully", HttpStatus.OK);
+            @Parameter(description = "User ID", required = true, example = "1")
+            @PathVariable Long id) {
+        try{
+            userService.deleteUser(id);
+            return ResponseEntity.ok("User deleted successfully");
+        }catch (EntityNotFoundException e) {
+            return ResponseEntity.notFound().build();
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().build();
+        }
     }
 
 }

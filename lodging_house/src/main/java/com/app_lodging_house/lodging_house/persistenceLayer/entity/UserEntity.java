@@ -2,7 +2,6 @@ package com.app_lodging_house.lodging_house.persistenceLayer.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
-
 import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.Set;
@@ -21,8 +20,6 @@ import java.util.Set;
 @Entity
 @Table(name = "users")
 @Data
-@Getter
-@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 public class UserEntity {

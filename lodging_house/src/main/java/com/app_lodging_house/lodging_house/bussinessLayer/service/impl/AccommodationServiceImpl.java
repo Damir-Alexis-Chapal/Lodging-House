@@ -6,12 +6,10 @@ import com.app_lodging_house.lodging_house.bussinessLayer.service.AccommodationS
 import com.app_lodging_house.lodging_house.persistenceLayer.dao.AccommodationDAO;
 import com.app_lodging_house.lodging_house.persistenceLayer.entity.AccommodationEntity;
 import com.app_lodging_house.lodging_house.persistenceLayer.mapper.AccommodationMapper;
-import com.app_lodging_house.lodging_house.persistenceLayer.repository.AccommodationRepository;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -21,7 +19,6 @@ import java.util.List;
 public class AccommodationServiceImpl implements AccommodationService {
 
     private final AccommodationDAO accommodationDAO;
-    private final AccommodationRepository accommodationRepository;
     private final AccommodationMapper accommodationMapper;
 
     @Override
@@ -52,12 +49,7 @@ public class AccommodationServiceImpl implements AccommodationService {
 
     @Override
     public List<AccommodationDTO> getAllAccommodations() {
-        List<AccommodationEntity> accommodationEntities = accommodationRepository.findAll();
-
-        List<AccommodationDTO> accommodationDTOS = new ArrayList<>();
-        for(AccommodationEntity accommodationEntity : accommodationEntities) {
-            accommodationDTOS.add(accommodationMapper.toDTO(accommodationEntity));
-        }
+        List<AccommodationDTO> accommodationDTOS = accommodationDAO.getAllAccommodations();
         return accommodationDTOS;
 
     }
