@@ -20,8 +20,6 @@ import java.util.List;
 public class BookingServiceImpl implements BookingService {
 
     private final BookingDAO bookingDAO;
-    private final BookingRepository bookingRepository;
-    private final BookingMapper bookingMapper;
 
     @Override
     public BookingDTO createBooking(BookingCreateDTO dto){
