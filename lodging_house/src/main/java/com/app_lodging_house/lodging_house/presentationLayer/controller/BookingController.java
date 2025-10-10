@@ -1,5 +1,7 @@
 package com.app_lodging_house.lodging_house.presentationLayer.controller;
 
+import com.app_lodging_house.lodging_house.bussinessLayer.dto.AccommodationCreateDTO;
+import com.app_lodging_house.lodging_house.bussinessLayer.dto.AccommodationDTO;
 import com.app_lodging_house.lodging_house.bussinessLayer.dto.BookingCreateDTO;
 import com.app_lodging_house.lodging_house.bussinessLayer.dto.BookingDTO;
 import com.app_lodging_house.lodging_house.bussinessLayer.service.BookingService;
@@ -97,7 +99,7 @@ public class BookingController {
 
     }
     //------------------------------------------------------------------------------------------------------------------
-    // ENDPOINT 4: GET BOOKINGS BY ACCOMMODATION
+    // ENDPOINT 4: GET BOOKINGS BY ACCOMMODATION ID
     @Operation(summary = "Get all bookings by accommodation ID")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Bookings found"),
@@ -111,6 +113,27 @@ public class BookingController {
         try {
             List<BookingDTO> bookings = bookingService.getByAccommodationId(accommodationId);
             return ResponseEntity.ok(bookings);
+        } catch (EntityNotFoundException e) {
+            return ResponseEntity.notFound().build();
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().build();
+        }
+    }
+    //------------------------------------------------------------------------------------------------------------------
+    // ENDPOINT 5: TO CANCEL BOOKINGS BY ID
+    @Operation(summary = "Cancel an existing booking")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Booking cancelled successfully"),
+            @ApiResponse(responseCode = "404", description = "Booking not found"),
+            @ApiResponse(responseCode = "400", description = "Invalid data"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+    @PutMapping("/cancel/{id}")
+    public ResponseEntity<BookingDTO> cancelBooking(
+            @PathVariable Long id) {
+        try {
+            BookingDTO bookingCancelled = bookingService.cancelBooking(id);
+            return ResponseEntity.ok(bookingCancelled);
         } catch (EntityNotFoundException e) {
             return ResponseEntity.notFound().build();
         } catch (IllegalArgumentException e) {

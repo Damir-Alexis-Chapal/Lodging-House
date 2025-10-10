@@ -2,9 +2,13 @@ package com.app_lodging_house.lodging_house.persistenceLayer.dao;
 
 import com.app_lodging_house.lodging_house.bussinessLayer.dto.BookingCreateDTO;
 import com.app_lodging_house.lodging_house.bussinessLayer.dto.BookingDTO;
+import com.app_lodging_house.lodging_house.persistenceLayer.entity.AccommodationEntity;
 import com.app_lodging_house.lodging_house.persistenceLayer.entity.BookingEntity;
+import com.app_lodging_house.lodging_house.persistenceLayer.entity.UserEntity;
 import com.app_lodging_house.lodging_house.persistenceLayer.mapper.BookingMapper;
+import com.app_lodging_house.lodging_house.persistenceLayer.repository.AccommodationRepository;
 import com.app_lodging_house.lodging_house.persistenceLayer.repository.BookingRepository;
+import com.app_lodging_house.lodging_house.persistenceLayer.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
@@ -16,6 +20,8 @@ import java.util.Optional;
 public class BookingDAO {
 
     private final BookingRepository bookingRepository;
+    private final UserRepository userRepository;
+    private final AccommodationRepository accommodationRepository;
     private final BookingMapper bookingMapper;
 
     public BookingDTO save(BookingCreateDTO dto) {
@@ -42,6 +48,14 @@ public class BookingDAO {
         return entities.stream()
                 .map(bookingMapper::toDTO)
                 .toList();
+    }
+
+    public BookingDTO saveCancelledBooking(Long id) {
+        BookingEntity entity = bookingRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Booking not found"));;
+        entity.setStatus("CANCELLED");
+        BookingEntity saved = bookingRepository.save(entity);
+        return bookingMapper.toDTO(saved);
     }
 
 }

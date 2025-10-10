@@ -4,6 +4,7 @@ import com.app_lodging_house.lodging_house.bussinessLayer.dto.BookingCreateDTO;
 import com.app_lodging_house.lodging_house.bussinessLayer.dto.BookingDTO;
 import com.app_lodging_house.lodging_house.bussinessLayer.service.BookingService;
 import com.app_lodging_house.lodging_house.persistenceLayer.dao.BookingDAO;
+import com.app_lodging_house.lodging_house.persistenceLayer.entity.BookingEntity;
 import com.app_lodging_house.lodging_house.persistenceLayer.mapper.BookingMapper;
 import com.app_lodging_house.lodging_house.persistenceLayer.repository.BookingRepository;
 import jakarta.transaction.Transactional;
@@ -20,6 +21,7 @@ import java.util.List;
 public class BookingServiceImpl implements BookingService {
 
     private final BookingDAO bookingDAO;
+    private final BookingMapper bookingMapper;
 
     @Override
     public BookingDTO createBooking(BookingCreateDTO dto){
@@ -45,4 +47,10 @@ public class BookingServiceImpl implements BookingService {
         return bookingDTO;
     }
 
+    @Override
+    public BookingDTO cancelBooking(Long id) {
+        BookingDTO cancelled = bookingDAO.saveCancelledBooking(id);
+        return cancelled;
+
+    }
 }

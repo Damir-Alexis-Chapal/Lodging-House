@@ -74,25 +74,5 @@ public class BookingMapper {
         return entity;
     }
 
-    //To Entity from CreateDTO
-    public BookingEntity entityToCreateDTO(BookingCreateDTO dto) {
-        BookingEntity entity = new BookingEntity();
 
-        entity.setDateCheckIn(dto.getDateCheckIn());
-        entity.setDateCheckOut(dto.getDateCheckOut());
-        entity.setGuestsNumber(dto.getGuestsNumber());
-
-        if (dto.getOwnerId() != null) {
-            UserEntity user = new UserEntity();
-            user.setId(dto.getOwnerId());
-            entity.setUser(user);
-        }
-        if (dto.getAccommodationId() != null) {
-            AccommodationEntity accommodation = new AccommodationEntity();
-            accommodation.setId(dto.getAccommodationId());
-            entity.setAccommodation(accommodation);
-        }
-
-        return entity;
-    }
 }
