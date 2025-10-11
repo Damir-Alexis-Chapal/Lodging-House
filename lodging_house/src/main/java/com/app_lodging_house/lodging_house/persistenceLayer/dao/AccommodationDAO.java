@@ -3,13 +3,14 @@ package com.app_lodging_house.lodging_house.persistenceLayer.dao;
 import com.app_lodging_house.lodging_house.bussinessLayer.dto.AccommodationCreateDTO;
 import com.app_lodging_house.lodging_house.bussinessLayer.dto.AccommodationDTO;
 import com.app_lodging_house.lodging_house.persistenceLayer.entity.AccommodationEntity;
+import com.app_lodging_house.lodging_house.persistenceLayer.entity.ServicesEntity;
 import com.app_lodging_house.lodging_house.persistenceLayer.mapper.AccommodationMapper;
 import com.app_lodging_house.lodging_house.persistenceLayer.repository.AccommodationRepository;
+import com.app_lodging_house.lodging_house.persistenceLayer.repository.ServicesRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+
+import java.util.*;
 
 @Repository
 @RequiredArgsConstructor
@@ -17,6 +18,7 @@ public class AccommodationDAO {
 
     private final AccommodationMapper accommodationMapper;
     private final AccommodationRepository accommodationRepository;
+    private final ServicesRepository servicesRepository;
 
     public AccommodationDTO save(AccommodationCreateDTO dto) {
         AccommodationEntity entity = accommodationMapper.toEntity(dto);
@@ -46,6 +48,17 @@ public class AccommodationDAO {
             accommodationDTOS.add(accommodationMapper.toDTO(accommodationEntity));
         }
         return accommodationDTOS;
+    }
+
+    public AccommodationDTO setServicesToAccommodation(Long id, List<Long> serviceIds) {
+        AccommodationEntity accommodation = accommodationRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Accommodation not found"));
+
+        Set<ServicesEntity> services = new HashSet<>(servicesRepository.findAllById(serviceIds));
+        accommodation.setServices(services);
+        AccommodationEntity saved = accommodationRepository.save(accommodation);
+
+        return accommodationMapper.toDTO(saved);
     }
 
 

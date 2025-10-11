@@ -3,6 +3,7 @@ package com.app_lodging_house.lodging_house.bussinessLayer.service;
 import com.app_lodging_house.lodging_house.bussinessLayer.dto.AccommodationCreateDTO;
 import com.app_lodging_house.lodging_house.bussinessLayer.dto.AccommodationDTO;
 import java.util.List;
+import java.util.Set;
 
 public interface AccommodationService {
     //To create a new Accommodation
@@ -17,4 +18,6 @@ public interface AccommodationService {
     List<AccommodationDTO> getAllAccommodations();
     //To delete Accommodation by id
     void deleteAccommodation(Long id);
+    //To add services
+    AccommodationDTO assignServicesToAccommodation(Long id, List<Long> serviceIds);
 }

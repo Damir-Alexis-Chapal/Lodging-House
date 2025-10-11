@@ -3,6 +3,7 @@ package com.app_lodging_house.lodging_house.presentationLayer.controller;
 import com.app_lodging_house.lodging_house.bussinessLayer.dto.AccommodationCreateDTO;
 import com.app_lodging_house.lodging_house.bussinessLayer.dto.AccommodationDTO;
 import com.app_lodging_house.lodging_house.bussinessLayer.dto.LocationDTO;
+import com.app_lodging_house.lodging_house.bussinessLayer.dto.ServiceAssignmentDTO;
 import com.app_lodging_house.lodging_house.bussinessLayer.service.AccommodationService;
 import com.app_lodging_house.lodging_house.bussinessLayer.service.LocationService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -18,6 +19,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/v1/accommodations")
@@ -43,18 +45,20 @@ public class AccommodationController {
     @Operation(summary = "Add a new accommodation")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "Accommodation created successfully"),
-            @ApiResponse(responseCode = "400", description = "Invalid data"),
+            @ApiResponse(responseCode = "400", description = "Invalid input data"),
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
     @PostMapping
     public ResponseEntity<AccommodationDTO> addAccommodation(
-            @Parameter(description = "Accommodation data that we need to create a new Accommodation", required = true)
+            @Parameter(description = "Accommodation data required to create a new accommodation", required = true)
             @RequestBody AccommodationCreateDTO dto) {
         try {
             AccommodationDTO createdAccommodation = accommodationService.createAccommodation(dto);
             return ResponseEntity.status(HttpStatus.CREATED).body(createdAccommodation);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().build();
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
     //------------------------------------------------------------------------------------------------------------------
@@ -67,16 +71,24 @@ public class AccommodationController {
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
     @PutMapping("/{id}")
-    public ResponseEntity<AccommodationDTO> updateAccommodation(
+    public ResponseEntity<?> updateAccommodation(
+            @Parameter(description = "Accommodation ID", example = "1", required = true)
             @PathVariable Long id,
+            @Parameter(description = "Updated accommodation data", required = true)
             @RequestBody AccommodationCreateDTO dto) {
         try {
             AccommodationDTO updatedAccommodation = accommodationService.updateAccommodation(id, dto);
+            if (updatedAccommodation == null) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body(Map.of("message", "Accommodation with ID " + id + " not found"));
+            }
             return ResponseEntity.ok(updatedAccommodation);
-        } catch (EntityNotFoundException e) {
-            return ResponseEntity.notFound().build();
         } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().build();
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(Map.of("error", "Invalid accommodation data: " + e.getMessage()));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("error", "An unexpected error occurred while updating the accommodation"));
         }
     }
     //------------------------------------------------------------------------------------------------------------------
@@ -85,31 +97,50 @@ public class AccommodationController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Accommodation found"),
             @ApiResponse(responseCode = "404", description = "Accommodation not found"),
+            @ApiResponse(responseCode = "400", description = "Invalid ID format"),
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
     @GetMapping("/{id}")
-    public ResponseEntity<AccommodationDTO> getAccommodationById(
-            @Parameter(description = "Accommodation ID", example = "1", required = true) @PathVariable long id) {
+    public ResponseEntity<?> getAccommodationById(
+            @Parameter(description = "Accommodation ID", example = "1", required = true)
+            @PathVariable long id) {
         try {
             AccommodationDTO accommodation = accommodationService.getAccommodationById(id);
+            if (accommodation == null) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body(Map.of("message", "Accommodation with ID " + id + " not found"));
+            }
             return ResponseEntity.ok(accommodation);
-        } catch (EntityNotFoundException e) {
-            return ResponseEntity.notFound().build();
         } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().build();
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(Map.of("error", "Invalid accommodation ID or request data"));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("error", "An unexpected error occurred while retrieving the accommodation"));
         }
     }
+
     //------------------------------------------------------------------------------------------------------------------
     // ENDPOINT 4: GET all
     @Operation(summary = "Get all accommodations")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "List of accommodations returned"),
+            @ApiResponse(responseCode = "204", description = "No accommodations found"),
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
     @GetMapping
-    public ResponseEntity<List<AccommodationDTO>> getAllAccommodations() {
-        List<AccommodationDTO> accommodationDTOS = accommodationService.getAllAccommodations();
-        return ResponseEntity.ok(accommodationDTOS);
+    public ResponseEntity<?> getAllAccommodations() {
+        try {
+            List<AccommodationDTO> accommodations = accommodationService.getAllAccommodations();
+            if (accommodations == null || accommodations.isEmpty()) {
+                return ResponseEntity.status(HttpStatus.NO_CONTENT)
+                        .body(Map.of("message", "No accommodations found"));
+            }
+            return ResponseEntity.ok(accommodations);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("error", "An unexpected error occurred while retrieving accommodations"));
+        }
     }
     //------------------------------------------------------------------------------------------------------------------
     // ENDPOINT 5: SEARCH by name
@@ -120,10 +151,20 @@ public class AccommodationController {
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
     @GetMapping("/search/{name}")
-    public ResponseEntity<AccommodationDTO> searchAccommodations(
-            @Parameter(description = "Accommodation name", example = "sol brillante") @PathVariable String name) {
-        AccommodationDTO accommodationDTO = accommodationService.getAccommodationByName(name);
-        return ResponseEntity.ok(accommodationDTO);
+    public ResponseEntity<?> searchAccommodations(
+            @Parameter(description = "Accommodation name", example = "Sol Brillante")
+            @PathVariable String name) {
+        try {
+            AccommodationDTO accommodationDTO = accommodationService.getAccommodationByName(name);
+            if (accommodationDTO == null) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body(Map.of("message", "No accommodation found with name: " + name));
+            }
+            return ResponseEntity.ok(accommodationDTO);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("error", "An unexpected error occurred while searching for the accommodation"));
+        }
     }
     //------------------------------------------------------------------------------------------------------------------
     // ENDPOINT 6: FILTER by price range or guests (it's just an example, we will add some more filter options later)
@@ -148,36 +189,84 @@ public class AccommodationController {
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Accommodation deleted successfully"),
             @ApiResponse(responseCode = "404", description = "Accommodation not found"),
+            @ApiResponse(responseCode = "400", description = "Invalid ID supplied"),
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
     @DeleteMapping("/{id}")
-    public ResponseEntity<String> deleteAccommodation(
-            @Parameter(description = "Accommodation ID", example = "1") @PathVariable long id) {
+    public ResponseEntity<?> deleteAccommodation(
+            @Parameter(description = "Accommodation ID", example = "1")
+            @PathVariable long id) {
         try {
             accommodationService.deleteAccommodation(id);
-            return ResponseEntity.ok("The accommodation has been deleted successfully");
+            return ResponseEntity.ok(Map.of("message", "The accommodation has been deleted successfully"));
         } catch (EntityNotFoundException e) {
-            return ResponseEntity.notFound().build();
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(Map.of("error", "Accommodation not found with ID: " + id));
         } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().build();
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(Map.of("error", e.getMessage()));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("error", "An unexpected error occurred while deleting the accommodation"));
         }
     }
-    // ENDPOINT 1: ADD accommodation
-    @Operation(summary = "Add a new accommodation")
+    //------------------------------------------------------------------------------------------------------------------
+    // ENDPOINT 8: ADD location to existing accommodation
+    @Operation(summary = "Add a new location")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "201", description = "Accommodation created successfully"),
+            @ApiResponse(responseCode = "201", description = "Location was added successfully"),
             @ApiResponse(responseCode = "400", description = "Invalid data"),
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
     @PostMapping("/location")
-    public ResponseEntity<LocationDTO> addLocation(
+    public ResponseEntity<?> addLocation(
             @Parameter(description = "Location data that we need to create a new Accommodation", required = true)
             @RequestBody LocationDTO dto) {
         try {
             LocationDTO locationDTO = locationService.addLocation(dto);
-            return ResponseEntity.status(HttpStatus.CREATED).body(locationDTO);
+            return ResponseEntity
+                    .status(HttpStatus.CREATED)
+                    .body(locationDTO);
+
         } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().build();
+            return ResponseEntity
+                    .status(HttpStatus.BAD_REQUEST)
+                    .body(Map.of("error", e.getMessage()));
+        } catch (Exception e) {
+            return ResponseEntity
+                    .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("error", "An unexpected error occurred while creating the location"));
         }
     }
+    //------------------------------------------------------------------------------------------------------------------
+    // ENDPOINT 9: ADD services to existing accommodation
+    @Operation(summary = "Add services for Accommodation")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "201", description = "Services were added successfully"),
+            @ApiResponse(responseCode = "400", description = "Invalid data"),
+            @ApiResponse(responseCode = "404", description = "Accommodation not found"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+    @PutMapping("/{id}/services")
+    public ResponseEntity<?> assignServices(
+            @PathVariable Long id,
+            @RequestBody ServiceAssignmentDTO dto) {
+
+        try {
+            if (dto == null || dto.getServiceIds() == null || dto.getServiceIds().isEmpty()) {
+                return ResponseEntity.badRequest().body("Service list cannot be empty.");
+            }
+            AccommodationDTO updated = accommodationService.assignServicesToAccommodation(id, dto.getServiceIds());
+            return ResponseEntity.status(HttpStatus.CREATED).body(updated);
+        } catch (EntityNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("An unexpected error occurred: " + e.getMessage());
+        }
+    }
+
+
 }

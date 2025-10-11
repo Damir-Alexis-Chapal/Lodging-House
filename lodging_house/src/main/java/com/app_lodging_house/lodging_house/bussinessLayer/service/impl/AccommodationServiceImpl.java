@@ -59,5 +59,10 @@ public class AccommodationServiceImpl implements AccommodationService {
         accommodationDAO.deleteAccommodation(id);
     }
 
+    @Override
+    public AccommodationDTO assignServicesToAccommodation(Long id, List<Long> serviceIds) {
+        AccommodationDTO accommodationDTO = accommodationDAO.setServicesToAccommodation(id, serviceIds);
+        return accommodationDTO;
+    }
 }
 

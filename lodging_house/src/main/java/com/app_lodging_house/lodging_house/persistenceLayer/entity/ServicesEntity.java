@@ -1,9 +1,8 @@
 package com.app_lodging_house.lodging_house.persistenceLayer.entity;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
+
 import java.util.HashSet;
 import java.util.Set;
 
@@ -25,7 +24,9 @@ public class ServicesEntity {
     @Column(name = "name", nullable = false)
     private String name;
 
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
     @ManyToMany(mappedBy = "services")
-    private Set<AccommodationEntity> users = new HashSet<>();
+    private Set<AccommodationEntity> accommodations = new HashSet<>();
 
 }

@@ -40,13 +40,12 @@ public class AccommodationMapper {
             UserEntity u = new UserEntity();
             u.setId(dto.getOwnerId());
             e.setUser(u);
-        } else {
-            e.setUser(null);
-        }
+        } else {e.setUser(null);}
+
+        if(dto.getId()!=null){e.setId(dto.getId());}
 
         return e;
     }
-
     //To update an entity from DTO
     public void updateEntityFromDto(AccommodationCreateDTO dto, AccommodationEntity entity) {
         if (dto == null || entity == null) return;
@@ -61,6 +60,7 @@ public class AccommodationMapper {
             u.setId(dto.getOwnerId());
             entity.setUser(u);
         }
+        if(dto.getId()!=null){entity.setId(dto.getId());}
     }
     //From DTO to entity
     public AccommodationEntity dtoToEntity(AccommodationDTO dto) {
@@ -93,6 +93,7 @@ public class AccommodationMapper {
         dto2.setMaxCapacity(dto.getMaxCapacity());
         dto2.setAvailable(dto.isAvailable());
         dto2.setOwnerId(dto.getOwnerId());
+        dto2.setId(dto.getId());
 
         return dto2;
     }
@@ -107,6 +108,7 @@ public class AccommodationMapper {
         dto.setMaxCapacity(e.getMaxCapacity());
         dto.setAvailable(e.isAvailable());
         dto.setOwnerId(e.getUser().getId());
+        dto.setId(e.getId());
 
         return dto;
     }

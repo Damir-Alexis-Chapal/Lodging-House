@@ -48,6 +48,8 @@ public class AccommodationEntity {
     @JoinColumn(name = "owner_id", nullable = false)
     private UserEntity user;
 
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
             name = "accommodation_services",
