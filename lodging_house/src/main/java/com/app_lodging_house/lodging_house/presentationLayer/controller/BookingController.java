@@ -1,7 +1,5 @@
 package com.app_lodging_house.lodging_house.presentationLayer.controller;
 
-import com.app_lodging_house.lodging_house.bussinessLayer.dto.AccommodationCreateDTO;
-import com.app_lodging_house.lodging_house.bussinessLayer.dto.AccommodationDTO;
 import com.app_lodging_house.lodging_house.bussinessLayer.dto.BookingCreateDTO;
 import com.app_lodging_house.lodging_house.bussinessLayer.dto.BookingDTO;
 import com.app_lodging_house.lodging_house.bussinessLayer.service.BookingService;

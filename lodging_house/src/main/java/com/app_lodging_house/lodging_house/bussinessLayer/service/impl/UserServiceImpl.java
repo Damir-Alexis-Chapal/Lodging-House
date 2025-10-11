@@ -4,8 +4,6 @@ import com.app_lodging_house.lodging_house.bussinessLayer.dto.UserCreateDTO;
 import com.app_lodging_house.lodging_house.bussinessLayer.dto.UserDTO;
 import com.app_lodging_house.lodging_house.bussinessLayer.service.UserService;
 import com.app_lodging_house.lodging_house.persistenceLayer.dao.UserDAO;
-import com.app_lodging_house.lodging_house.persistenceLayer.entity.UserEntity;
-import com.app_lodging_house.lodging_house.persistenceLayer.mapper.UserMapper;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -19,15 +17,12 @@ import java.util.List;
 @Slf4j
 public class UserServiceImpl implements UserService {
 
-    private final UserMapper userMapper;
     private final UserDAO userDAO;
-
     @Override
-    public UserDTO createUser(UserCreateDTO cDto){
+    public UserDTO createUser(UserCreateDTO cDto) {
         UserDTO userDTO = userDAO.save(cDto);
         return userDTO;
     }
-
     @Override
     public UserDTO getById(Long id){
         UserDTO dto = userDAO.findById(id);
@@ -49,6 +44,12 @@ public class UserServiceImpl implements UserService {
     @Override
     public void deleteUser(Long id) {
         userDAO.deleteUser(id);
+    }
+
+    @Override
+    public UserDTO updateUserRole(Long id, UserCreateDTO dto) {
+        UserDTO userDTO = userDAO.updateRole(id, dto);
+        return userDTO;
     }
 
 }

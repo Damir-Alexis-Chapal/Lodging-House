@@ -2,12 +2,12 @@ package com.app_lodging_house.lodging_house.persistenceLayer.dao;
 
 import com.app_lodging_house.lodging_house.bussinessLayer.dto.UserCreateDTO;
 import com.app_lodging_house.lodging_house.bussinessLayer.dto.UserDTO;
+import com.app_lodging_house.lodging_house.persistenceLayer.entity.RoleEntity;
 import com.app_lodging_house.lodging_house.persistenceLayer.entity.UserEntity;
 import com.app_lodging_house.lodging_house.persistenceLayer.mapper.UserMapper;
 import com.app_lodging_house.lodging_house.persistenceLayer.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -18,10 +18,15 @@ public class UserDAO {
     private final UserRepository userRepository;
     private final UserMapper userMapper;
 
-    public UserDTO save(UserCreateDTO cDto){
+    public UserDTO save(UserCreateDTO cDto) {
         UserEntity entity = userMapper.toEntity(cDto);
-        UserEntity saved = userRepository.save(entity);
-        return userMapper.toDTO(saved);
+
+        RoleEntity role = new RoleEntity();
+        role.setId(1L);
+        entity.setRole(role);
+
+        UserEntity savedUser = userRepository.save(entity);
+        return userMapper.toDTO(savedUser);
     }
 
     public UserDTO findById(Long id){
@@ -54,9 +59,26 @@ public class UserDAO {
         return userMapper.toDTO(updated);
     }
 
-
-    public void deleteUser(Long id){
+    public void deleteUser(Long id) {
         userRepository.deleteById(id);
+    }
+
+    public UserDTO updateRole(Long id, UserCreateDTO cDto) {
+        UserEntity existingUser = userRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        existingUser.setName(cDto.getName());
+        existingUser.setEmail(cDto.getEmail());
+        existingUser.setPassword(cDto.getPassword());
+        existingUser.setPhoneNumber(cDto.getPhoneNumber());
+        existingUser.setBirthDate(cDto.getBirthDate());
+        existingUser.setProfileImg(cDto.getProfileImg());
+        existingUser.setPersonalDescription(cDto.getPersonalDescription());
+        RoleEntity role = new RoleEntity();
+        role.setId(2L);
+        existingUser.setRole(role);
+        UserEntity updated = userRepository.save(existingUser);
+        return userMapper.toDTO(updated);
     }
 
 }

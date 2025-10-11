@@ -20,7 +20,7 @@ public class UserCreateDTO {
     private String name;
 
     @NotBlank(message = "The email is required")
-    @Schema(description = "User email", example = "alexis@gmail.com", required = false)
+    @Schema(description = "User email", example = "alexis@gmail.com", required = true)
     private String email;
 
     @Schema(description = "User password", example = "asdbi2u", required = true)

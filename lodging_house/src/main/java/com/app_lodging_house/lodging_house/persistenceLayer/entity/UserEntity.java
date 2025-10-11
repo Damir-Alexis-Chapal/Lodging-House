@@ -3,8 +3,6 @@ package com.app_lodging_house.lodging_house.persistenceLayer.entity;
 import jakarta.persistence.*;
 import lombok.*;
 import java.time.LocalDate;
-import java.util.HashSet;
-import java.util.Set;
 
 //id SERIAL PRIMARY KEY,
 //name VARCHAR(100) NOT NULL,
@@ -50,12 +48,8 @@ public class UserEntity {
     @Column(name = "personal_description")
     private String personalDescription;
 
-    @ManyToMany(fetch = FetchType.EAGER)
-    @JoinTable(
-            name = "user_roles",
-            joinColumns = @JoinColumn(name = "user_id"),
-            inverseJoinColumns = @JoinColumn(name = "role_id")
-    )
-    private Set<RoleEntity> roles = new HashSet<>();
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "role_id")
+    private RoleEntity role;
 
 }

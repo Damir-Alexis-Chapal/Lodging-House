@@ -1,12 +1,8 @@
 package com.app_lodging_house.lodging_house.presentationLayer.controller;
 
-import com.app_lodging_house.lodging_house.bussinessLayer.dto.AccommodationCreateDTO;
-import com.app_lodging_house.lodging_house.bussinessLayer.dto.AccommodationDTO;
 import com.app_lodging_house.lodging_house.bussinessLayer.dto.UserCreateDTO;
 import com.app_lodging_house.lodging_house.bussinessLayer.dto.UserDTO;
 import com.app_lodging_house.lodging_house.bussinessLayer.service.UserService;
-import com.app_lodging_house.lodging_house.persistenceLayer.entity.UserEntity;
-import com.app_lodging_house.lodging_house.persistenceLayer.repository.UserRepository;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -48,7 +44,7 @@ public class UserController {
             @ApiResponse(responseCode = "409", description = "Email already in use"),
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
-    @PostMapping()
+    @PostMapping
     public ResponseEntity<UserDTO> registerUser(
             @Parameter(description = "User data that we need to create a new Accommodation", required = true)
             @RequestBody UserCreateDTO dto) {
@@ -135,5 +131,27 @@ public class UserController {
             return ResponseEntity.badRequest().build();
         }
     }
-
+    //------------------------------------------------------------------------------------------------------------------
+    // ENDPOINT 6: UPDATE default user role (USER) to host role user (HOST)
+    @Operation(summary = "Update the role for an existing user")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "User updated successfully"),
+            @ApiResponse(responseCode = "400", description = "Invalid input"),
+            @ApiResponse(responseCode = "404", description = "User not found"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+    @PutMapping("/role/{id}")
+    public ResponseEntity<UserDTO> updateUserRole(
+            @Parameter(description = "User data", required = true)
+            @PathVariable Long id,
+            @RequestBody UserCreateDTO dto){
+        try {
+            UserDTO updatedUser = userService.updateUserRole(id, dto);
+            return ResponseEntity.ok(updatedUser);
+        } catch (EntityNotFoundException e) {
+            return ResponseEntity.notFound().build();
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().build();
+        }
+    }
 }

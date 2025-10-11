@@ -1,31 +1,30 @@
 package com.app_lodging_house.lodging_house.persistenceLayer.entity;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 import lombok.NoArgsConstructor;
+import lombok.AllArgsConstructor;
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
-
-//id SERIAL PRIMARY KEY,
-//name VARCHAR(50) NOT NULL
 
 @Entity
 @Table(name = "roles")
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 public class RoleEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id")
     private Long id;
 
-    @Column(name = "name", nullable = false)
+    @Column(nullable = false)
     private String name;
 
-    @ManyToMany(mappedBy = "roles")
+    @OneToMany(mappedBy = "role")
     private Set<UserEntity> users = new HashSet<>();
 
     @ManyToMany(fetch = FetchType.EAGER)
@@ -36,4 +35,16 @@ public class RoleEntity {
     )
     private Set<PrivilegeEntity> privileges = new HashSet<>();
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof RoleEntity)) return false;
+        RoleEntity that = (RoleEntity) o;
+        return Objects.equals(id, that.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
+    }
 }
