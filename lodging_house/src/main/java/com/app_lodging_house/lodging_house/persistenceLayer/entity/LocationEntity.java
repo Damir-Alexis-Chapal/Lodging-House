@@ -26,7 +26,7 @@ public class LocationEntity {
     private Long id;
 
     @Column(name = "city", nullable = false,  length = 100)
-    private String name;
+    private String city;
 
     @Column(name = "department", nullable = false,  length = 100)
     private String department;

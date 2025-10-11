@@ -2,7 +2,9 @@ package com.app_lodging_house.lodging_house.presentationLayer.controller;
 
 import com.app_lodging_house.lodging_house.bussinessLayer.dto.AccommodationCreateDTO;
 import com.app_lodging_house.lodging_house.bussinessLayer.dto.AccommodationDTO;
+import com.app_lodging_house.lodging_house.bussinessLayer.dto.LocationDTO;
 import com.app_lodging_house.lodging_house.bussinessLayer.service.AccommodationService;
+import com.app_lodging_house.lodging_house.bussinessLayer.service.LocationService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -35,6 +37,8 @@ public class AccommodationController {
     500 Internal Server Error → unexpected error.*/
     //------------------------------------------------------------------------------------------------------------------
     private final AccommodationService accommodationService;
+    private final LocationService locationService;
+
     // ENDPOINT 1: ADD accommodation
     @Operation(summary = "Add a new accommodation")
     @ApiResponses(value = {
@@ -154,6 +158,24 @@ public class AccommodationController {
             return ResponseEntity.ok("The accommodation has been deleted successfully");
         } catch (EntityNotFoundException e) {
             return ResponseEntity.notFound().build();
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().build();
+        }
+    }
+    // ENDPOINT 1: ADD accommodation
+    @Operation(summary = "Add a new accommodation")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "201", description = "Accommodation created successfully"),
+            @ApiResponse(responseCode = "400", description = "Invalid data"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+    @PostMapping("/location")
+    public ResponseEntity<LocationDTO> addLocation(
+            @Parameter(description = "Location data that we need to create a new Accommodation", required = true)
+            @RequestBody LocationDTO dto) {
+        try {
+            LocationDTO locationDTO = locationService.addLocation(dto);
+            return ResponseEntity.status(HttpStatus.CREATED).body(locationDTO);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().build();
         }
