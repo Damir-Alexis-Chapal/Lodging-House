@@ -15,6 +15,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/v1/reviews")
@@ -45,16 +46,22 @@ public class ReviewController {
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
     @PostMapping
-    public ResponseEntity<ReviewDTO> addReview(
+    public ResponseEntity<?> addReview(
             @Parameter(description = "Review data that we need to create a new one", required = true)
             @RequestBody ReviewDTO dto) {
         try{
             ReviewDTO reviewDTO = reviewService.createReview(dto);
             return ResponseEntity.status(HttpStatus.CREATED).body(reviewDTO);
         } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().build();
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(Map.of("status", 400,"error", "Bad Request","message", e.getMessage()));
+        } catch (SecurityException e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(Map.of("status", 401,"error", "Unauthorized","message", e.getMessage()));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("status", 500,"error", "Internal Server Error","message", e.getMessage()));
         }
-
     }
     //------------------------------------------------------------------------------------------------------------------
     // ENDPOINT 2: GET all reviews for accommodation
@@ -65,16 +72,18 @@ public class ReviewController {
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
     @GetMapping("/accommodation/{id}")
-    public ResponseEntity<List<ReviewDTO>> getReviewsByAccommodation(
+    public ResponseEntity<?> getReviewsByAccommodation(
             @Parameter(description = "Accommodation id", required = true)
             @PathVariable Long id) {
         try{
             List<ReviewDTO> dtos = reviewService.findAllByAccommodationId(id);
             return ResponseEntity.ok(dtos);
         }catch (EntityNotFoundException e) {
-            return ResponseEntity.notFound().build();
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().build();
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(Map.of("status", 404,"error", "Not Found","message", e.getMessage()));
+        }catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("status", 500,"error", "Internal Server Error","message", e.getMessage()));
         }
     }
     //------------------------------------------------------------------------------------------------------------------
@@ -86,11 +95,18 @@ public class ReviewController {
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
     @GetMapping("/accommodation/{id}/average")
-    public ResponseEntity<Double> getAverageRating(
+    public ResponseEntity<?> getAverageRating(
             @Parameter(description = "Accommodation id", required = true)
             @PathVariable Long id) {
-
-        return ResponseEntity.ok(reviewService.getAverageRatingForAccommodation(id));
+        try {
+            return ResponseEntity.ok(reviewService.getAverageRatingForAccommodation(id));
+        }catch (EntityNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(Map.of("status", 404,"error", "Not Found","message", e.getMessage()));
+        }catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("status", 500,"error", "Internal Server Error","message", e.getMessage()));
+        }
     }
     //------------------------------------------------------------------------------------------------------------------
     // ENDPOINT 4: Get all reviews for user
@@ -101,16 +117,18 @@ public class ReviewController {
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
     @GetMapping("/user/{id}")
-    public ResponseEntity<List<ReviewDTO>> getReviewsByUser(
+    public ResponseEntity<?> getReviewsByUser(
             @Parameter(description = "User id", required = true)
             @PathVariable Long id) {
         try{
             List<ReviewDTO> dtos = reviewService.findAllByUserId(id);
             return ResponseEntity.ok(dtos);
         }catch (EntityNotFoundException e) {
-            return ResponseEntity.notFound().build();
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().build();
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(Map.of("status", 404,"error", "Not Found","message", e.getMessage()));
+        }catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("status", 500,"error", "Internal Server Error","message", e.getMessage()));
         }
     }
 

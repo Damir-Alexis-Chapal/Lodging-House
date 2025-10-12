@@ -17,7 +17,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
 import java.util.List;
 import java.util.Map;
 
@@ -49,16 +48,19 @@ public class AccommodationController {
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
     @PostMapping
-    public ResponseEntity<AccommodationDTO> addAccommodation(
+    public ResponseEntity<?> addAccommodation(
             @Parameter(description = "Accommodation data required to create a new accommodation", required = true)
             @RequestBody AccommodationCreateDTO dto) {
         try {
             AccommodationDTO createdAccommodation = accommodationService.createAccommodation(dto);
             return ResponseEntity.status(HttpStatus.CREATED).body(createdAccommodation);
         } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().build();
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(Map.of("status", 400,"error", "Bad Request","message", e.getMessage()));
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("status", 500,"error", "Internal Server Error","message", e.getMessage()
+                    ));
         }
     }
     //------------------------------------------------------------------------------------------------------------------
@@ -83,12 +85,15 @@ public class AccommodationController {
                         .body(Map.of("message", "Accommodation with ID " + id + " not found"));
             }
             return ResponseEntity.ok(updatedAccommodation);
+        } catch (EntityNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(Map.of("status", 404,"error", "Not Found","message", e.getMessage()));
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(Map.of("error", "Invalid accommodation data: " + e.getMessage()));
+                    .body(Map.of("status", 400,"error", "Bad Request","message", e.getMessage()));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(Map.of("error", "An unexpected error occurred while updating the accommodation"));
+                    .body(Map.of("status", 500,"error", "Internal Server Error","message", e.getMessage()));
         }
     }
     //------------------------------------------------------------------------------------------------------------------
@@ -111,12 +116,15 @@ public class AccommodationController {
                         .body(Map.of("message", "Accommodation with ID " + id + " not found"));
             }
             return ResponseEntity.ok(accommodation);
+        } catch (EntityNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(Map.of("status", 404,"error", "Not Found","message", e.getMessage()));
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(Map.of("error", "Invalid accommodation ID or request data"));
+                    .body(Map.of("status", 400,"error", "Bad Request","message", e.getMessage()));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(Map.of("error", "An unexpected error occurred while retrieving the accommodation"));
+                    .body(Map.of("status", 500,"error", "Internal Server Error","message", e.getMessage()));
         }
     }
 
@@ -125,7 +133,7 @@ public class AccommodationController {
     @Operation(summary = "Get all accommodations")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "List of accommodations returned"),
-            @ApiResponse(responseCode = "204", description = "No accommodations found"),
+            @ApiResponse(responseCode = "404", description = "No accommodations found"),
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
     @GetMapping
@@ -137,9 +145,12 @@ public class AccommodationController {
                         .body(Map.of("message", "No accommodations found"));
             }
             return ResponseEntity.ok(accommodations);
-        } catch (Exception e) {
+        } catch (EntityNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(Map.of("status", 404,"error", "Not Found","message", e.getMessage()));
+        }catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(Map.of("error", "An unexpected error occurred while retrieving accommodations"));
+                    .body(Map.of("status", 500,"error", "Internal Server Error","message", e.getMessage()));
         }
     }
     //------------------------------------------------------------------------------------------------------------------
@@ -161,9 +172,12 @@ public class AccommodationController {
                         .body(Map.of("message", "No accommodation found with name: " + name));
             }
             return ResponseEntity.ok(accommodationDTO);
-        } catch (Exception e) {
+        } catch (EntityNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(Map.of("status", 404,"error", "Not Found","message", e.getMessage()));
+        }catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(Map.of("error", "An unexpected error occurred while searching for the accommodation"));
+                    .body(Map.of("status", 500,"error", "Internal Server Error","message", e.getMessage()));
         }
     }
     //------------------------------------------------------------------------------------------------------------------
@@ -201,13 +215,13 @@ public class AccommodationController {
             return ResponseEntity.ok(Map.of("message", "The accommodation has been deleted successfully"));
         } catch (EntityNotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(Map.of("error", "Accommodation not found with ID: " + id));
+                    .body(Map.of("status", 404,"error", "Not Found","message", e.getMessage()));
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(Map.of("error", e.getMessage()));
+                    .body(Map.of("status", 400,"error", "Bad Request","message", e.getMessage()));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(Map.of("error", "An unexpected error occurred while deleting the accommodation"));
+                    .body(Map.of("status", 500,"error", "Internal Server Error","message", e.getMessage()));
         }
     }
     //------------------------------------------------------------------------------------------------------------------
@@ -224,18 +238,13 @@ public class AccommodationController {
             @RequestBody LocationDTO dto) {
         try {
             LocationDTO locationDTO = locationService.addLocation(dto);
-            return ResponseEntity
-                    .status(HttpStatus.CREATED)
-                    .body(locationDTO);
-
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity
-                    .status(HttpStatus.BAD_REQUEST)
-                    .body(Map.of("error", e.getMessage()));
+            return ResponseEntity.status(HttpStatus.CREATED).body(locationDTO);
+        }catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(Map.of("status", 400,"error", "Bad Request","message", e.getMessage()));
         } catch (Exception e) {
-            return ResponseEntity
-                    .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(Map.of("error", "An unexpected error occurred while creating the location"));
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("status", 500,"error", "Internal Server Error","message", e.getMessage()));
         }
     }
     //------------------------------------------------------------------------------------------------------------------
@@ -259,12 +268,14 @@ public class AccommodationController {
             AccommodationDTO updated = accommodationService.assignServicesToAccommodation(id, dto.getServiceIds());
             return ResponseEntity.status(HttpStatus.CREATED).body(updated);
         } catch (EntityNotFoundException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(Map.of("status", 404,"error", "Not Found","message", e.getMessage()));
         } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(Map.of("status", 400,"error", "Bad Request","message", e.getMessage()));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body("An unexpected error occurred: " + e.getMessage());
+                    .body(Map.of("status", 500,"error", "Internal Server Error","message", e.getMessage()));
         }
     }
 

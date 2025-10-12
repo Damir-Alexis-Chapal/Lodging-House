@@ -15,6 +15,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/v1/bookings")
@@ -35,23 +36,26 @@ public class BookingController {
     //------------------------------------------------------------------------------------------------------------------
     private final BookingService bookingService;
     // ENDPOINT 1: CREATE BOOKING
-    @Operation(
-            summary = "Create a new booking",
-            description = "Creates a booking for a user, with check-in, check-out and number of guests")
+    @Operation(summary = "Create a new booking")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "Booking created successfully"),
             @ApiResponse(responseCode = "400", description = "Invalid booking data"),
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
     @PostMapping
-    public ResponseEntity<BookingDTO> createBooking(
-            @Parameter(description = "Booking data that we need to create a new Booking", required = true)
+    public ResponseEntity<?> createBooking(
+            @Parameter(description = "Booking data used to create a new Booking", required = true)
             @RequestBody BookingCreateDTO dto) {
         try {
             BookingDTO createdBooking = bookingService.createBooking(dto);
             return ResponseEntity.status(HttpStatus.CREATED).body(createdBooking);
         } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().build();
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(Map.of("status", 400,"error", "Bad Request","message", e.getMessage()));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("status", 500,"error", "Internal Server Error","message", e.getMessage()
+                    ));
         }
     }
     //------------------------------------------------------------------------------------------------------------------
@@ -59,21 +63,29 @@ public class BookingController {
     @Operation(summary = "Get a booking by ID")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Booking found"),
+            @ApiResponse(responseCode = "400", description = "Invalid booking ID"),
             @ApiResponse(responseCode = "404", description = "Booking not found"),
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
     @GetMapping("/{id}")
-    public ResponseEntity<BookingDTO> getBookingById(
-            @Parameter(description = "Booking ID", required = true, example = "1") @PathVariable long id) {
+    public ResponseEntity<?> getBookingById(
+            @Parameter(description = "Booking ID", required = true, example = "1")
+            @PathVariable long id) {
         try {
             BookingDTO booking = bookingService.getBookingById(id);
             return ResponseEntity.ok(booking);
         } catch (EntityNotFoundException e) {
-            return ResponseEntity.notFound().build();
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(Map.of("status", 404,"error", "Not Found","message", e.getMessage()));
         } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().build();
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(Map.of("status", 400,"error", "Bad Request","message", e.getMessage()));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("status", 500,"error", "Internal Server Error","message", e.getMessage()));
         }
     }
+
     //------------------------------------------------------------------------------------------------------------------
     // ENDPOINT 3: GET BOOKINGS BY USER
     @Operation(summary = "Get all bookings by user ID")
@@ -82,17 +94,18 @@ public class BookingController {
             @ApiResponse(responseCode = "404", description = "No bookings found for this user"),
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
-
     @GetMapping("/user/{userId}")
-    public ResponseEntity<List<BookingDTO>> getAllBookingsByUserId(
+    public ResponseEntity<?> getAllBookingsByUserId(
             @Parameter(description = "User ID", required = true, example = "1") @PathVariable long userId) {
         try {
             List<BookingDTO> bookings = bookingService.getByUserId(userId);
             return ResponseEntity.ok(bookings);
-        } catch (EntityNotFoundException e) {
-            return ResponseEntity.notFound().build();
         } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().build();
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(Map.of("status", 404,"error", "Bad Request","message", e.getMessage()));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("status", 500,"error", "Internal Server Error","message", e.getMessage()));
         }
 
     }
@@ -105,16 +118,18 @@ public class BookingController {
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
     @GetMapping("/accommodation/{accommodationId}")
-    public ResponseEntity<List<BookingDTO>> getAllBookingsByAccommodationId(
+    public ResponseEntity<?> getAllBookingsByAccommodationId(
             @Parameter(description = "Accommodation ID", required = true, example = "10")
             @PathVariable long accommodationId) {
         try {
             List<BookingDTO> bookings = bookingService.getByAccommodationId(accommodationId);
             return ResponseEntity.ok(bookings);
-        } catch (EntityNotFoundException e) {
-            return ResponseEntity.notFound().build();
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().build();
+        }  catch (EntityNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(Map.of("status", 404,"error", "Not Found","message", e.getMessage()));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("status", 500,"error", "Internal Server Error","message", e.getMessage()));
         }
     }
     //------------------------------------------------------------------------------------------------------------------
@@ -127,15 +142,20 @@ public class BookingController {
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
     @PutMapping("/cancel/{id}")
-    public ResponseEntity<BookingDTO> cancelBooking(
+    public ResponseEntity<?> cancelBooking(
             @PathVariable Long id) {
         try {
             BookingDTO bookingCancelled = bookingService.cancelBooking(id);
             return ResponseEntity.ok(bookingCancelled);
         } catch (EntityNotFoundException e) {
-            return ResponseEntity.notFound().build();
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(Map.of("status", 404,"error", "Not Found","message", e.getMessage()));
         } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().build();
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(Map.of("status", 400,"error", "Bad Request","message", e.getMessage()));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("status", 500,"error", "Internal Server Error","message", e.getMessage()));
         }
     }
 
