@@ -2,8 +2,10 @@ package com.app_lodging_house.lodging_house.bussinessLayer.service.impl;
 
 import com.app_lodging_house.lodging_house.bussinessLayer.dto.AccommodationCreateDTO;
 import com.app_lodging_house.lodging_house.bussinessLayer.dto.AccommodationDTO;
+import com.app_lodging_house.lodging_house.bussinessLayer.dto.AccommodationImagesDTO;
 import com.app_lodging_house.lodging_house.bussinessLayer.service.AccommodationService;
 import com.app_lodging_house.lodging_house.persistenceLayer.dao.AccommodationDAO;
+import com.app_lodging_house.lodging_house.persistenceLayer.dao.AccommodationImagesDAO;
 import com.app_lodging_house.lodging_house.persistenceLayer.entity.AccommodationEntity;
 import com.app_lodging_house.lodging_house.persistenceLayer.mapper.AccommodationMapper;
 import jakarta.transaction.Transactional;
@@ -20,6 +22,7 @@ public class AccommodationServiceImpl implements AccommodationService {
 
     private final AccommodationDAO accommodationDAO;
     private final AccommodationMapper accommodationMapper;
+    private final AccommodationImagesDAO accommodationImagesDAO;
 
     @Override
     public AccommodationDTO createAccommodation(AccommodationCreateDTO dto) {
@@ -63,6 +66,17 @@ public class AccommodationServiceImpl implements AccommodationService {
     public AccommodationDTO assignServicesToAccommodation(Long id, List<Long> serviceIds) {
         AccommodationDTO accommodationDTO = accommodationDAO.setServicesToAccommodation(id, serviceIds);
         return accommodationDTO;
+    }
+
+    @Override
+    public List<AccommodationImagesDTO> saveImagesForAccommodation(List<AccommodationImagesDTO> images){
+        List<AccommodationImagesDTO> imagesSaved = accommodationImagesDAO.save(images);
+        return imagesSaved;
+    }
+    @Override
+    public List<AccommodationImagesDTO> getAllAccommodationImages(Long id){
+        List<AccommodationImagesDTO> images = accommodationImagesDAO.findAllByAccommodationId(id);
+        return images;
     }
 }
 

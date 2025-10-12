@@ -1,9 +1,6 @@
 package com.app_lodging_house.lodging_house.presentationLayer.controller;
 
-import com.app_lodging_house.lodging_house.bussinessLayer.dto.AccommodationCreateDTO;
-import com.app_lodging_house.lodging_house.bussinessLayer.dto.AccommodationDTO;
-import com.app_lodging_house.lodging_house.bussinessLayer.dto.LocationDTO;
-import com.app_lodging_house.lodging_house.bussinessLayer.dto.ServiceAssignmentDTO;
+import com.app_lodging_house.lodging_house.bussinessLayer.dto.*;
 import com.app_lodging_house.lodging_house.bussinessLayer.service.AccommodationService;
 import com.app_lodging_house.lodging_house.bussinessLayer.service.LocationService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -278,6 +275,62 @@ public class AccommodationController {
                     .body(Map.of("status", 500,"error", "Internal Server Error","message", e.getMessage()));
         }
     }
+    //------------------------------------------------------------------------------------------------------------------
+    // ENDPOINT 10: ADD images to existing accommodation
+    @Operation(summary = "Add services for Accommodation")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Images were added successfully"),
+            @ApiResponse(responseCode = "400", description = "Invalid data"),
+            @ApiResponse(responseCode = "404", description = "Accommodation not found"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+    @PostMapping("/images")
+    public ResponseEntity<?> assignImagesToAccommodation(
+            @RequestBody List<AccommodationImagesDTO> images) {
 
+        try {
+            if (images == null || images.isEmpty()) {
+                return ResponseEntity.badRequest().body("Images list cannot be empty.");
+            }
+            List<AccommodationImagesDTO> imagesSaved = accommodationService.saveImagesForAccommodation(images);
+            return ResponseEntity.ok(imagesSaved);
+        } catch (EntityNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(Map.of("status", 404,"error", "Not Found","message", e.getMessage()));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(Map.of("status", 400,"error", "Bad Request","message", e.getMessage()));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("status", 500,"error", "Internal Server Error","message", e.getMessage()));
+        }
+    }
+    //------------------------------------------------------------------------------------------------------------------
+    // ENDPOINT 11: GET all images by accommodation id
+    @Operation(summary = "Get all accommodation images")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "List of accommodation images returned"),
+            @ApiResponse(responseCode = "404", description = "No accommodation images found"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+    @GetMapping("/{id}/images")
+    public ResponseEntity<?> getAllAccommodationImages(
+            @Parameter(description = "Accommodation id", required = true)
+            @PathVariable Long id) {
+        try {
+            List<AccommodationImagesDTO> accommodationImages = accommodationService.getAllAccommodationImages(id);
+            if (accommodationImages == null || accommodationImages.isEmpty()) {
+                return ResponseEntity.status(HttpStatus.NO_CONTENT)
+                        .body(Map.of("message", "No accommodation images found"));
+            }
+            return ResponseEntity.ok(accommodationImages);
+        } catch (EntityNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(Map.of("status", 404,"error", "Not Found","message", e.getMessage()));
+        }catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("status", 500,"error", "Internal Server Error","message", e.getMessage()));
+        }
+    }
 
 }
