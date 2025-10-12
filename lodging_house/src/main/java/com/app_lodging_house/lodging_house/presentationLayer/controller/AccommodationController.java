@@ -277,7 +277,7 @@ public class AccommodationController {
     }
     //------------------------------------------------------------------------------------------------------------------
     // ENDPOINT 10: ADD images to existing accommodation
-    @Operation(summary = "Add services for Accommodation")
+    @Operation(summary = "Add images for Accommodation")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Images were added successfully"),
             @ApiResponse(responseCode = "400", description = "Invalid data"),
