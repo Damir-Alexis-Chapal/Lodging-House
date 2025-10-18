@@ -14,9 +14,6 @@ import lombok.NoArgsConstructor;
 @Schema(description = "DTO used to create a new accommodation")
 public class AccommodationCreateDTO {
 
-    @Schema(description = "Accommodation id (this is just used in updates)", example = "1")
-    private Long id;
-
     @NotBlank(message = "The name is required")
     @Schema(description = "Accommodation name", example = "El solecito", required = true)
     private String name;

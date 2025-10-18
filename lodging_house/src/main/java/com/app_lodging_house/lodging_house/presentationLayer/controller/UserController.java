@@ -131,7 +131,6 @@ public class UserController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(Map.of("status", 500,"error", "Internal Server Error","message", e.getMessage()));
         }
-
     }
     //------------------------------------------------------------------------------------------------------------------
     // ENDPOINT 5: DELETE user by ID

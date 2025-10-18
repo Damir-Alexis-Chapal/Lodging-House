@@ -25,11 +25,11 @@ public class BookingCreateDTO {
     private Long ownerId;
 
     @NotBlank(message = "The date check in is required")
-    @Schema(description = "Date check in", example = "2025-10-04 17:46:59.128654")
+    @Schema(description = "Date check in", example = "2025-10-04")
     private LocalDate dateCheckIn;
 
     @NotBlank(message = "The date check out is required")
-    @Schema(description = "Date check out", example = "2025-10-04 17:46:59.128654")
+    @Schema(description = "Date check out", example = "2025-10-04")
     private LocalDate dateCheckOut;
 
     @NotNull(message = "The guests number is required")
