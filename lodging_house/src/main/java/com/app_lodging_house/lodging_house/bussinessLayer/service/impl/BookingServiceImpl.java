@@ -21,35 +21,73 @@ import java.util.List;
 public class BookingServiceImpl implements BookingService {
 
     private final BookingDAO bookingDAO;
-    private final BookingMapper bookingMapper;
 
     @Override
     public BookingDTO createBooking(BookingCreateDTO dto){
+        if(dto==null){
+            throw new IllegalArgumentException("Booking DTO cannot be null");
+        }
         BookingDTO bookingDTO = bookingDAO.save(dto);
         return bookingDTO;
     }
 
     @Override
     public BookingDTO getBookingById(Long id) {
+        if(id==null){
+            throw new IllegalArgumentException("Booking ID cannot be null");
+        }
+        if(id <= 0){
+            throw new IllegalArgumentException("Booking ID cannot be negative or zero");
+        }
         BookingDTO bookingDTO = bookingDAO.findById(id);
+        if(bookingDTO==null){
+            throw new IllegalArgumentException("Booking not be found");
+        }
         return bookingDTO;
     }
 
     @Override
     public List<BookingDTO> getByUserId(Long id){
+        if(id==null){
+            throw new IllegalArgumentException("User ID cannot be null");
+        }
+        if(id <= 0){
+            throw new IllegalArgumentException("User ID cannot be negative or zero");
+        }
         List<BookingDTO> bookingDTO = bookingDAO.findByUserId(id);
+        if(bookingDTO==null){
+            throw new IllegalArgumentException("Booking not be found");
+        }
         return bookingDTO;
     }
 
     @Override
     public List<BookingDTO> getByAccommodationId(Long id){
+        if(id==null){
+            throw new IllegalArgumentException("Accommodation ID cannot be null");
+        }
+        if(id <= 0){
+            throw new IllegalArgumentException("Accommodation ID cannot be negative or zero");
+        }
         List<BookingDTO> bookingDTO = bookingDAO.findByAccommodationId(id);
+        if(bookingDTO==null){
+            throw new IllegalArgumentException("Booking not be found");
+        }
         return bookingDTO;
     }
 
     @Override
     public BookingDTO cancelBooking(Long id) {
+        if(id==null){
+            throw new IllegalArgumentException("Booking ID cannot be null");
+        }
+        if(id <= 0){
+            throw new IllegalArgumentException("Booking ID cannot be negative or zero");
+        }
         BookingDTO cancelled = bookingDAO.saveCancelledBooking(id);
+        if(cancelled==null){
+            throw new IllegalArgumentException("Booking not be found");
+        }
         return cancelled;
 
     }

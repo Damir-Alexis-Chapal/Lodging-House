@@ -40,6 +40,11 @@ dependencies {
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 }
 
+test {
+    useJUnitPlatform()
+    jvmArgs += ["-XX:+EnableDynamicAgentLoading"]
+}
+
 
 tasks.named('test') {
     useJUnitPlatform()

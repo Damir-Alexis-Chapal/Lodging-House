@@ -464,7 +464,10 @@ public class AccommodationServiceTest {
         serviceIds.add(3L);
 
         when(accommodationDAO.setServicesToAccommodation(validAccommodationId, serviceIds)).thenReturn(existing);
-        accommodationService.assignServicesToAccommodation(validAccommodationId, serviceIds);
+        AccommodationDTO result = accommodationService.assignServicesToAccommodation(validAccommodationId, serviceIds);
+
+        assertThat(result).isNotNull();
+        assertThat(result).isEqualTo(existing);
 
         verify(accommodationDAO, times(1)).setServicesToAccommodation(validAccommodationId, serviceIds);
 
@@ -514,7 +517,10 @@ public class AccommodationServiceTest {
         images.add(existing2);
 
         when(accommodationImagesDAO.save(images)).thenReturn(images);
-        accommodationService.saveImagesForAccommodation(images);
+        List<AccommodationImagesDTO> result = accommodationService.saveImagesForAccommodation(images);
+
+        assertThat(result).isNotNull();
+        assertThat(result).isEqualTo(images);
 
         verify(accommodationImagesDAO, times(1)).save(images);
 
@@ -543,7 +549,7 @@ public class AccommodationServiceTest {
         verify(accommodationImagesDAO, never()).save(images);
     }
 
-//==================================== To test saveImagesForAccommodation method=====================================
+//==================================== To test getAllAccommodationImages method=====================================
 
     @Test
     @DisplayName("READ -  Should return Accommodations images by ID")
