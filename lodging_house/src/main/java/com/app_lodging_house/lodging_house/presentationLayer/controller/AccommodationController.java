@@ -232,7 +232,7 @@ public class AccommodationController {
     @PostMapping("/location")
     public ResponseEntity<?> addLocation(
             @Parameter(description = "Location data that we need to create a new Accommodation", required = true)
-            @RequestBody LocationDTO dto) {
+            @RequestBody LocationCreateDTO dto) {
         try {
             LocationDTO locationDTO = locationService.addLocation(dto);
             return ResponseEntity.status(HttpStatus.CREATED).body(locationDTO);

@@ -1,5 +1,6 @@
 package com.app_lodging_house.lodging_house.persistenceLayer.mapper;
 
+import com.app_lodging_house.lodging_house.bussinessLayer.dto.LocationCreateDTO;
 import com.app_lodging_house.lodging_house.bussinessLayer.dto.LocationDTO;
 import com.app_lodging_house.lodging_house.persistenceLayer.entity.AccommodationEntity;
 import com.app_lodging_house.lodging_house.persistenceLayer.entity.LocationEntity;
@@ -11,25 +12,6 @@ import org.mapstruct.ReportingPolicy;
         unmappedTargetPolicy = ReportingPolicy.WARN
 )
 public class LocationMapper {
-
-    // To convert from DTO to Entity
-    public LocationEntity toEntity(LocationDTO dto) {
-        if (dto == null) return null;
-
-        LocationEntity entity = new LocationEntity();
-        entity.setId(dto.getId());
-        entity.setCity(dto.getCity());
-        entity.setDepartment(dto.getDepartment());
-        entity.setLatitude(dto.getLatitude());
-        entity.setLongitude(dto.getLongitude());
-        entity.setAddress(dto.getAddress());
-
-        AccommodationEntity accommodation = new AccommodationEntity();
-        accommodation.setId(dto.getAccommodationId());
-        entity.setAccommodation(accommodation);
-
-        return entity;
-    }
 
     // To convert from Entity to DTO
     public LocationDTO toDTO(LocationEntity entity) {
@@ -48,6 +30,23 @@ public class LocationMapper {
         }
 
         return dto;
+    }
+
+    public LocationEntity cDtoToEntity(LocationCreateDTO dto) {
+        if (dto == null) return null;
+
+        LocationEntity entity = new LocationEntity();
+        entity.setCity(dto.getCity());
+        entity.setDepartment(dto.getDepartment());
+        entity.setLatitude(dto.getLatitude());
+        entity.setLongitude(dto.getLongitude());
+        entity.setAddress(dto.getAddress());
+
+        AccommodationEntity accommodation = new AccommodationEntity();
+        accommodation.setId(dto.getAccommodationId());
+        entity.setAccommodation(accommodation);
+
+        return entity;
     }
 }
 
