@@ -588,7 +588,7 @@ public class AccommodationServiceTest {
     }
 
     @Test
-    @DisplayName("getAllAccommodationImages - Should throw exception when id is null")
+    @DisplayName("READ - Should throw exception when id is null")
     void getAllAccommodationImages_IdNull_ShouldThrowException() {
         assertThatThrownBy(() -> accommodationService.getAllAccommodationImages(null))
                 .isInstanceOf(IllegalArgumentException.class)
@@ -599,7 +599,7 @@ public class AccommodationServiceTest {
     }
 
     @Test
-    @DisplayName("getAllAccommodationImages - Should throw exception when id <= 0")
+    @DisplayName("READ - Should throw exception when id <= 0")
     void getAllAccommodationImages_IdLessThanOrEqualZero_ShouldThrowException() {
         assertThatThrownBy(() -> accommodationService.getAllAccommodationImages(0L))
                 .isInstanceOf(IllegalArgumentException.class)
@@ -610,7 +610,7 @@ public class AccommodationServiceTest {
     }
 
     @Test
-    @DisplayName("getAllAccommodationImages - Should throw exception when accommodation not found")
+    @DisplayName("READ - Should throw exception when accommodation not found")
     void getAllAccommodationImages_AccommodationNotFound_ShouldThrowException() {
 
         when(accommodationDAO.findById(1L)).thenReturn(null);

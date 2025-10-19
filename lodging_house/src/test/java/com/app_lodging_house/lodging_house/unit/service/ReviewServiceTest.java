@@ -1,9 +1,13 @@
 package com.app_lodging_house.lodging_house.unit.service;
 
+import com.app_lodging_house.lodging_house.bussinessLayer.dto.AccommodationDTO;
 import com.app_lodging_house.lodging_house.bussinessLayer.dto.ReviewCreateDTO;
 import com.app_lodging_house.lodging_house.bussinessLayer.dto.ReviewDTO;
+import com.app_lodging_house.lodging_house.bussinessLayer.dto.UserDTO;
 import com.app_lodging_house.lodging_house.bussinessLayer.service.impl.ReviewServiceImpl;
+import com.app_lodging_house.lodging_house.persistenceLayer.dao.AccommodationDAO;
 import com.app_lodging_house.lodging_house.persistenceLayer.dao.ReviewDAO;
+import com.app_lodging_house.lodging_house.persistenceLayer.dao.UserDAO;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -11,6 +15,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -24,18 +30,29 @@ public class ReviewServiceTest {
     @Mock
     private ReviewDAO reviewDAO;
 
+    @Mock
+    private UserDAO userDAO;
+
+    @Mock
+    private AccommodationDAO accommodationDAO;
+
     @InjectMocks
     private ReviewServiceImpl reviewService;
 
     private ReviewDTO validDTO;
     private ReviewCreateDTO validReviewCreateDTO;
+    private AccommodationDTO validAccommodationDTO;
+    private UserDTO validUserDTO;
     private int validRate;
     private int invalidRateMin;
     private int invalidRateMax;
     private double accumulator;
+    private double validPrice;
     private Long validAccommodationId;
     private Long validUserId;
     private List<ReviewDTO> reviewDTOS;
+    private LocalDate validDate;
+
 
     @BeforeEach
     void setUp(){
@@ -44,6 +61,8 @@ public class ReviewServiceTest {
         invalidRateMax = 6;
         validAccommodationId = 1L;
         validUserId = 1L;
+        validPrice = 100000;
+        validDate = LocalDate.parse("2025-10-10");
 
         validDTO = new ReviewDTO(
                 1L,
@@ -57,6 +76,27 @@ public class ReviewServiceTest {
                 1L,
                 validRate,
                 "hola"
+        );
+
+        validAccommodationDTO = new AccommodationDTO(
+                1L,
+                "Hoja",
+                "Best place ever",
+                validPrice,
+                5,
+                true,
+                1L
+        );
+
+        validUserDTO = new UserDTO(
+                validUserId,
+                "Alexis",
+                "Alexis@gmail.com",
+                "aksjhas",
+                "3124887186",
+                validDate,
+                "https://personajes-de-ficcion-",
+                "ADOMINATIOOOOON"
         );
 
         reviewDTOS = new ArrayList<>();
@@ -122,11 +162,13 @@ public class ReviewServiceTest {
     @DisplayName("READ - Should return a list with all Reviews by Accommodation ID")
     void findAllByAccommodationId_ValidData_ShouldReturnAllReviewsByAccommodationId() {
 
+        when(accommodationDAO.findById(validAccommodationId)).thenReturn(validAccommodationDTO);
         when(reviewDAO.findAllByAccommodationId(validAccommodationId)).thenReturn(reviewDTOS);
         List<ReviewDTO> result = reviewService.findAllByAccommodationId(validAccommodationId);
         assertThat(result).isNotNull();
         assertThat(result).isEqualTo(reviewDTOS);
 
+        verify(accommodationDAO, times(1)).findById(validAccommodationId);
         verify(reviewDAO, times(1)).findAllByAccommodationId(validAccommodationId);
     }
 
@@ -161,14 +203,29 @@ public class ReviewServiceTest {
     @DisplayName("READ - Should throw exception when DAO returns null")
     void findAllByAccommodationId_DaoReturnsNull_ShouldThrowException() {
 
+        when(accommodationDAO.findById(validAccommodationId)).thenReturn(validAccommodationDTO);
         when(reviewDAO.findAllByAccommodationId(validAccommodationId)).thenReturn(null);
 
         assertThatThrownBy(() -> reviewService.findAllByAccommodationId(validAccommodationId))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("Reviews not be found");
 
+        verify(accommodationDAO, times(1)).findById(validAccommodationId);
         verify(reviewDAO, times(1)).findAllByAccommodationId(validAccommodationId);
     }
+
+    @Test
+    @DisplayName("READ - Should throw exception when Accommodation does not exists")
+    void findAllByAccommodationId_NoAccommodationFound_ShouldThrowException() {
+        when(accommodationDAO.findById(validAccommodationId)).thenReturn(null);
+        assertThatThrownBy(() -> reviewService.findAllByAccommodationId(validAccommodationId)).
+                isInstanceOf(IllegalArgumentException.class).
+                hasMessage("Accommodation cannot be found");
+
+        verify(accommodationDAO, times(1)).findById(validAccommodationId);
+        verify(reviewDAO, never()).findAllByAccommodationId(validAccommodationId);
+    }
+
 
 //==================================== To test findAllByUserId method=====================================
 
@@ -176,11 +233,13 @@ public class ReviewServiceTest {
     @DisplayName("READ - Should return a list with all Reviews by User ID")
     void findAllByUserId_ValidData_ShouldReturnAllReviewsByUserId() {
 
+        when(userDAO.findById(validUserId)).thenReturn(validUserDTO);
         when(reviewDAO.findAllByUserId(validUserId)).thenReturn(reviewDTOS);
         List<ReviewDTO> result = reviewService.findAllByUserId(validUserId);
         assertThat(result).isNotNull();
         assertThat(result).isEqualTo(reviewDTOS);
 
+        verify(userDAO, times(1)).findById(validUserId);
         verify(reviewDAO, times(1)).findAllByUserId(validUserId);
     }
 
@@ -215,12 +274,14 @@ public class ReviewServiceTest {
     @DisplayName("READ - Should throw exception when DAO returns null")
     void findAllByUserId_DaoReturnsNull_ShouldThrowException() {
 
+        when(userDAO.findById(validUserId)).thenReturn(validUserDTO);
         when(reviewDAO.findAllByUserId(validUserId)).thenReturn(null);
 
         assertThatThrownBy(() -> reviewService.findAllByUserId(validUserId))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("Reviews not be found");
 
+        verify(userDAO, times(1)).findById(validUserId);
         verify(reviewDAO, times(1)).findAllByUserId(validUserId);
     }
 
@@ -230,11 +291,14 @@ public class ReviewServiceTest {
     @DisplayName("READ - Should return average rating for Accommodation by ID")
     void getAverageRatingForAccommodation_ValidData_ShouldReturnAverageRating() {
 
+        when(accommodationDAO.findById(validAccommodationId)).thenReturn(validAccommodationDTO);
         when(reviewDAO.findAllByAccommodationId(validAccommodationId)).thenReturn(reviewDTOS);
+
         double result = reviewService.getAverageRatingForAccommodation(validAccommodationId);
 
         assertThat(result).isEqualTo(accumulator);
 
+        verify(accommodationDAO, times(2)).findById(validAccommodationId);
         verify(reviewDAO, times(1)).findAllByAccommodationId(validAccommodationId);
     }
 
@@ -269,12 +333,14 @@ public class ReviewServiceTest {
     @DisplayName("READ - Should throw exception when DAO returns null")
     void getAverageRatingForAccommodation_DaoReturnsNull_ShouldThrowException() {
 
+        when(accommodationDAO.findById(validAccommodationId)).thenReturn(validAccommodationDTO);
         when(reviewDAO.findAllByAccommodationId(validAccommodationId)).thenReturn(null);
 
         assertThatThrownBy(() -> reviewService.getAverageRatingForAccommodation(validAccommodationId))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("Reviews not be found");
 
+        verify(accommodationDAO, times(2)).findById(validAccommodationId);
         verify(reviewDAO, times(1)).findAllByAccommodationId(validAccommodationId);
     }
 }

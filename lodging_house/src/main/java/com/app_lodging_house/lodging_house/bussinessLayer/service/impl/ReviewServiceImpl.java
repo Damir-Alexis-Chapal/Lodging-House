@@ -3,7 +3,9 @@ package com.app_lodging_house.lodging_house.bussinessLayer.service.impl;
 import com.app_lodging_house.lodging_house.bussinessLayer.dto.ReviewCreateDTO;
 import com.app_lodging_house.lodging_house.bussinessLayer.dto.ReviewDTO;
 import com.app_lodging_house.lodging_house.bussinessLayer.service.ReviewService;
+import com.app_lodging_house.lodging_house.persistenceLayer.dao.AccommodationDAO;
 import com.app_lodging_house.lodging_house.persistenceLayer.dao.ReviewDAO;
+import com.app_lodging_house.lodging_house.persistenceLayer.dao.UserDAO;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -17,7 +19,8 @@ import java.util.List;
 public class ReviewServiceImpl implements ReviewService {
 
     private final ReviewDAO reviewDAO;
-
+    private final AccommodationDAO accommodationDAO;
+    private final UserDAO userDAO;
     @Override
     public ReviewDTO createReview(ReviewCreateDTO dto){
         if(dto==null){
@@ -38,6 +41,9 @@ public class ReviewServiceImpl implements ReviewService {
         if(id<=0L){
             throw new IllegalArgumentException("Accommodation ID must be greater than 0");
         }
+        if(accommodationDAO.findById(id)==null){
+            throw new IllegalArgumentException("Accommodation cannot be found");
+        }
         List<ReviewDTO> dtos = reviewDAO.findAllByAccommodationId(id);
 
         if(dtos==null){
@@ -55,6 +61,9 @@ public class ReviewServiceImpl implements ReviewService {
         if(id<=0L){
             throw new IllegalArgumentException("User ID must be greater than 0");
         }
+        if(userDAO.findById(id)==null){
+            throw new IllegalArgumentException("User cannot be found");
+        }
         List<ReviewDTO> dtos = reviewDAO.findAllByUserId(id);
         if(dtos==null){
             throw new IllegalArgumentException("Reviews not be found");
@@ -69,6 +78,9 @@ public class ReviewServiceImpl implements ReviewService {
         }
         if(id<=0L){
             throw new IllegalArgumentException("Accommodation ID must be greater than 0");
+        }
+        if(accommodationDAO.findById(id)==null){
+            throw new IllegalArgumentException("Accommodation cannot be found");
         }
         List<ReviewDTO> dtos = findAllByAccommodationId(id);
         if(dtos==null){

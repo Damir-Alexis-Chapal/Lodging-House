@@ -18,7 +18,7 @@ public class UserDTO {
     @Schema(description = "User name", example = "Alexis chapal", required = true)
     private String name;
 
-    @Schema(description = "User email", example = "alexis@gmail.com", required = false)
+    @Schema(description = "User email", example = "alexis@gmail.com", required = true)
     private String email;
 
     @Schema(description = "User password", example = "asdbi2u", required = true)
