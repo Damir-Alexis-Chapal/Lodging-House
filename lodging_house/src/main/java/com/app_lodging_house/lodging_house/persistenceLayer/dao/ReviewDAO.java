@@ -1,5 +1,6 @@
 package com.app_lodging_house.lodging_house.persistenceLayer.dao;
 
+import com.app_lodging_house.lodging_house.bussinessLayer.dto.ReviewCreateDTO;
 import com.app_lodging_house.lodging_house.bussinessLayer.dto.ReviewDTO;
 import com.app_lodging_house.lodging_house.persistenceLayer.entity.ReviewEntity;
 import com.app_lodging_house.lodging_house.persistenceLayer.mapper.ReviewMapper;
@@ -16,8 +17,8 @@ public class ReviewDAO {
     private final ReviewMapper reviewMapper;
     private final ReviewReposityory reviewRepository;
 
-    public ReviewDTO save(ReviewDTO dto){
-        ReviewEntity entity = reviewMapper.toEntity(dto);
+    public ReviewDTO save(ReviewCreateDTO dto){
+        ReviewEntity entity = reviewMapper.cDtoToEntity(dto);
         ReviewEntity saved = reviewRepository.save(entity);
 
         return reviewMapper.toDTO(saved);

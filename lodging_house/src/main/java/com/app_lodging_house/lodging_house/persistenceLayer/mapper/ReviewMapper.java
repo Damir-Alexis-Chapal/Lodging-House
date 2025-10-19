@@ -1,5 +1,6 @@
 package com.app_lodging_house.lodging_house.persistenceLayer.mapper;
 
+import com.app_lodging_house.lodging_house.bussinessLayer.dto.ReviewCreateDTO;
 import com.app_lodging_house.lodging_house.bussinessLayer.dto.ReviewDTO;
 import com.app_lodging_house.lodging_house.persistenceLayer.entity.AccommodationEntity;
 import com.app_lodging_house.lodging_house.persistenceLayer.entity.ReviewEntity;
@@ -28,6 +29,29 @@ public class ReviewMapper {
         }
         ReviewEntity entity = new ReviewEntity();
         entity.setId(dto.getId());
+        entity.setRate(dto.getRate());
+        entity.setComment(dto.getComment());
+
+        if (dto.getAccommodationId() != null) {
+            AccommodationEntity accommodation = new AccommodationEntity();
+            accommodation.setId(dto.getAccommodationId());
+            entity.setAccommodation(accommodation);
+        }
+
+        if (dto.getUserId() != null) {
+            UserEntity user = new UserEntity();
+            user.setId(dto.getUserId());
+            entity.setUser(user);
+        }
+
+        return entity;
+    }
+
+    public ReviewEntity cDtoToEntity(ReviewCreateDTO dto){
+        if (dto == null) {
+            return null;
+        }
+        ReviewEntity entity = new ReviewEntity();
         entity.setRate(dto.getRate());
         entity.setComment(dto.getComment());
 

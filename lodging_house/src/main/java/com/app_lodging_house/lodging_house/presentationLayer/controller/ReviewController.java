@@ -1,5 +1,6 @@
 package com.app_lodging_house.lodging_house.presentationLayer.controller;
 
+import com.app_lodging_house.lodging_house.bussinessLayer.dto.ReviewCreateDTO;
 import com.app_lodging_house.lodging_house.bussinessLayer.dto.ReviewDTO;
 import com.app_lodging_house.lodging_house.bussinessLayer.service.ReviewService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -48,7 +49,7 @@ public class ReviewController {
     @PostMapping
     public ResponseEntity<?> addReview(
             @Parameter(description = "Review data that we need to create a new one", required = true)
-            @RequestBody ReviewDTO dto) {
+            @RequestBody ReviewCreateDTO dto) {
         try{
             ReviewDTO reviewDTO = reviewService.createReview(dto);
             return ResponseEntity.status(HttpStatus.CREATED).body(reviewDTO);
