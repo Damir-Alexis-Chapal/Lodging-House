@@ -3,6 +3,7 @@ package com.app_lodging_house.lodging_house.bussinessLayer.service.impl;
 import com.app_lodging_house.lodging_house.bussinessLayer.dto.BookingCreateDTO;
 import com.app_lodging_house.lodging_house.bussinessLayer.dto.BookingDTO;
 import com.app_lodging_house.lodging_house.bussinessLayer.service.BookingService;
+import com.app_lodging_house.lodging_house.persistenceLayer.dao.AccommodationDAO;
 import com.app_lodging_house.lodging_house.persistenceLayer.dao.BookingDAO;
 import com.app_lodging_house.lodging_house.persistenceLayer.entity.BookingEntity;
 import com.app_lodging_house.lodging_house.persistenceLayer.mapper.BookingMapper;
@@ -21,13 +22,22 @@ import java.util.List;
 public class BookingServiceImpl implements BookingService {
 
     private final BookingDAO bookingDAO;
-
+    private final AccommodationDAO accommodationDAO;
     @Override
     public BookingDTO createBooking(BookingCreateDTO dto){
         if(dto==null){
             throw new IllegalArgumentException("Booking DTO cannot be null");
         }
+        if(accommodationDAO.findById(dto.getAccommodationId())==null){
+            throw new IllegalArgumentException("Accommodation not found");
+        }
+        if(dto.getGuestsNumber()>accommodationDAO.findById(dto.getAccommodationId()).getMaxCapacity()){
+            throw new IllegalArgumentException("Capacity exceeded");
+        }
         BookingDTO bookingDTO = bookingDAO.save(dto);
+        if(bookingDTO==null){
+            throw new IllegalArgumentException("Booking not saved");
+        }
         return bookingDTO;
     }
 

@@ -1,8 +1,10 @@
 package com.app_lodging_house.lodging_house.unit.service;
 
+import com.app_lodging_house.lodging_house.bussinessLayer.dto.AccommodationDTO;
 import com.app_lodging_house.lodging_house.bussinessLayer.dto.BookingCreateDTO;
 import com.app_lodging_house.lodging_house.bussinessLayer.dto.BookingDTO;
 import com.app_lodging_house.lodging_house.bussinessLayer.service.impl.BookingServiceImpl;
+import com.app_lodging_house.lodging_house.persistenceLayer.dao.AccommodationDAO;
 import com.app_lodging_house.lodging_house.persistenceLayer.dao.BookingDAO;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -25,19 +27,24 @@ public class BookingServiceTest {
     @Mock
     private BookingDAO bookingDAO;
 
+    @Mock
+    private AccommodationDAO accommodationDAO;
+
     @InjectMocks
     private BookingServiceImpl bookingService;
 
     private BookingCreateDTO validCdto;
     private BookingDTO validDTO;
+    private AccommodationDTO validAccommodationDTO;
     private LocalDate validDateIn;
     private LocalDate validDateOut;
     private List<BookingDTO> bookingDTOList;
-
+    private double validPrice;
     @BeforeEach
     void setUp() {
         validDateIn = LocalDate.parse("2025-10-04");
         validDateOut = LocalDate.parse("2025-10-15");
+        validPrice = 100000;
 
         validCdto = new BookingCreateDTO(
                 1L,
@@ -55,6 +62,16 @@ public class BookingServiceTest {
                 5,
                 "PENDING"
         );
+        validAccommodationDTO = new AccommodationDTO(
+                1L,
+                "Hoja",
+                "Best place ever",
+                validPrice,
+                5,
+                true,
+                1L
+        );
+
         bookingDTOList = new ArrayList<>();
         bookingDTOList.add(validDTO);
     }
@@ -64,13 +81,14 @@ public class BookingServiceTest {
     @Test
     @DisplayName("CREATE - Should return created booking")
     void createBooking_ValidData_ShouldReturnCreatedBooking() {
-
+        when(accommodationDAO.findById(validAccommodationDTO.getId())).thenReturn(validAccommodationDTO);
         when(bookingDAO.save(validCdto)).thenReturn(validDTO);
         BookingDTO result = bookingService.createBooking(validCdto);
 
         assertThat(result).isNotNull();
         assertThat(result.getId()).isEqualTo(validDTO.getId());
 
+        verify(accommodationDAO, times(2)).findById(validAccommodationDTO.getId());
         verify(bookingDAO, times(1)).save(validCdto);
     }
 
@@ -83,6 +101,46 @@ public class BookingServiceTest {
 
         verify(bookingDAO, never()).save(null);
     }
+
+    @Test
+    @DisplayName("CREATE - Should thrown exception when Accommodation cannot be found")
+    void createBooking_AccommodationNotFound_ShouldThrowException() {
+        when(accommodationDAO.findById(validAccommodationDTO.getId())).thenReturn(null);
+        assertThatThrownBy(() -> bookingService.createBooking(validCdto)).
+                isInstanceOf(IllegalArgumentException.class).
+                hasMessage("Accommodation not found");
+
+        verify(bookingDAO, never()).save(validCdto);
+    }
+
+    @Test
+    @DisplayName("CREATE - Should thrown exception when Booking cannot be saved")
+    void createBooking_BookingNotSaved_ShouldThrowException() {
+        when(accommodationDAO.findById(validAccommodationDTO.getId())).thenReturn(validAccommodationDTO);
+        when(bookingDAO.save(validCdto)).thenReturn(null);
+
+        assertThatThrownBy(() -> bookingService.createBooking(validCdto)).
+                isInstanceOf(IllegalArgumentException.class).
+                hasMessage("Booking not saved");
+
+        verify(accommodationDAO, times(2)).findById(validAccommodationDTO.getId());
+        verify(bookingDAO, times(1)).save(validCdto);
+    }
+
+    @Test
+    @DisplayName("CREATE - Should throw exception when capacity is exceeded")
+    void createBooking_CapacityExceeded_ShouldThrowException() {
+        validDTO.setGuestsNumber(6);
+        validAccommodationDTO.setMaxCapacity(3);
+
+        when(accommodationDAO.findById(validAccommodationDTO.getId())).thenReturn(validAccommodationDTO);
+        assertThatThrownBy(() -> bookingService.createBooking(validCdto))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("Capacity exceeded");
+
+        verify(bookingDAO, never()).save(any());
+    }
+
 
 //==================================== To test getBookingByID method=====================================
 
