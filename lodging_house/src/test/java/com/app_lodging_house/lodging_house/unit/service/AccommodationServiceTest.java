@@ -37,13 +37,18 @@ public class AccommodationServiceTest {
     @InjectMocks
     private AccommodationServiceImpl accommodationService;
 
-    private AccommodationCreateDTO validAccommodationDTO;
-    private AccommodationDTO expectedAccommodationDTO;
+    private AccommodationCreateDTO validCdto;
+    private AccommodationCreateDTO validCupdatedDto;
+    private AccommodationDTO validAccommodationDTO;
+    private AccommodationDTO validUpdatedDTO;
+    private AccommodationEntity entity;
     private Long validAccommodationId;
     private Long validOwnerId;
     private double validPrice;
     private double invalidPrice;
-    private AccommodationCreateDTO baseDTO;
+    private List<AccommodationDTO> accommodations;
+    private List<Long> serviceIds;
+    private List<AccommodationImagesDTO> images;
 
     @BeforeEach
     void setUp() {
@@ -52,7 +57,7 @@ public class AccommodationServiceTest {
         invalidPrice = 0;
         validAccommodationId = 1L;
 
-        validAccommodationDTO = new AccommodationCreateDTO(
+        validCdto = new AccommodationCreateDTO(
                 "Hoja",
                 "Best place ever",
                 validPrice,
@@ -61,7 +66,7 @@ public class AccommodationServiceTest {
                 validOwnerId
         );
 
-        expectedAccommodationDTO = new AccommodationDTO(
+        validAccommodationDTO = new AccommodationDTO(
                 1L,
                 "Hoja",
                 "Best place ever",
@@ -71,99 +76,143 @@ public class AccommodationServiceTest {
                 validOwnerId
         );
 
-        baseDTO = new AccommodationCreateDTO(
-                "Hoja",
+        validCupdatedDto = new AccommodationCreateDTO(
+                "agua",
                 "Best place ever",
                 validPrice,
                 5,
                 true,
+                validOwnerId
+        );
+
+        validUpdatedDTO = new AccommodationDTO(
+                1L,
+                "Agua",
+                "Best place ever",
+                validPrice,
+                5,
+                true,
+                validOwnerId
+        );
+
+        accommodations = new ArrayList<>();
+        accommodations.add(validAccommodationDTO);
+
+        serviceIds = new ArrayList<>();
+        serviceIds.add(1L);
+        serviceIds.add(2L);
+        serviceIds.add(3L);
+
+        images = new ArrayList<>();
+        AccommodationImagesDTO existing = new AccommodationImagesDTO(
+                1L,
+                "https://holaxd",
                 1L
         );
+        AccommodationImagesDTO existing2 = new AccommodationImagesDTO(
+                2L,
+                "https://holaxd",
+                1L
+        );
+        images.add(existing);
+        images.add(existing2);
+
+        entity = new AccommodationEntity();
+
+        entity.setId(validAccommodationDTO.getId());
+        entity.setName("agua");
+        entity.setDescription("Best place ever");
+        entity.setPrice(validPrice);
+        entity.setMaxCapacity(5);
+        entity.setAvailable(true);
+        UserEntity user = new UserEntity();
+        user.setId(validOwnerId);
+        entity.setUser(user);
+
     }
 //==================================== To test CreateAccommodation method=====================================
     @Test
     @DisplayName("CREATE - Should return created AccommodationDTO")
     void createAccommodation_ValidData_ShouldReturnCreatedAccommodation() {
 
-        when(accommodationDAO.save(any())).thenReturn(expectedAccommodationDTO);
+        when(accommodationDAO.save(validCdto)).thenReturn(validAccommodationDTO);
 
-        AccommodationDTO result = accommodationService.createAccommodation(validAccommodationDTO);
+        AccommodationDTO result = accommodationService.createAccommodation(validCdto);
 
         assertThat(result).isNotNull();
-        assertThat(result.getId()).isEqualTo(1L);
-        assertThat(result.getName()).isEqualTo("Hoja");
-        assertThat(result.getPrice()).isEqualByComparingTo(validPrice);
-        assertThat(result.getDescription()).isEqualTo("Best place ever");
-        assertThat(result.getOwnerId()).isEqualTo(validOwnerId);
+        assertThat(result.getId()).isEqualTo(validAccommodationDTO.getId());
 
-        verify(accommodationDAO, times(1)).save(validAccommodationDTO);
+        verify(accommodationDAO, times(1)).save(validCdto);
     }
     @Test
     @DisplayName("CREATE - Should throw exception when name is null")
     void createAccommodation_NameNull_ShouldThrowException() {
-        baseDTO.setName(null);
+        validCdto.setName(null);
 
-        assertThatThrownBy(() -> accommodationService.createAccommodation(baseDTO))
+        assertThatThrownBy(() -> accommodationService.createAccommodation(validCdto))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("name");
+
+        verify(accommodationDAO, never()).save(validCdto);
     }
 
     @Test
     @DisplayName("CREATE - Should throw exception when price is zero or negative")
     void createAccommodation_InvalidPrice_ShouldThrowException() {
-        baseDTO.setPrice(invalidPrice);
+        validCdto.setPrice(invalidPrice);
 
-        assertThatThrownBy(() -> accommodationService.createAccommodation(baseDTO))
+        assertThatThrownBy(() -> accommodationService.createAccommodation(validCdto))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("price");
 
-        verify(accommodationDAO, never()).save(validAccommodationDTO);
+        verify(accommodationDAO, never()).save(validCdto);
     }
 
     @Test
     @DisplayName("CREATE - Should throw exception when maxCapacity is zero or negative")
     void createAccommodation_InvalidMaxCapacity_ShouldThrowException() {
-        baseDTO.setMaxCapacity(0);
+        validCdto.setMaxCapacity(0);
 
-        assertThatThrownBy(() -> accommodationService.createAccommodation(baseDTO))
+        assertThatThrownBy(() -> accommodationService.createAccommodation(validCdto))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("maximum capacity");
+
+        verify(accommodationDAO, never()).save(validCdto);
     }
 
     @Test
     @DisplayName("CREATE - Should throw exception when ownerId is null")
     void createAccommodation_OwnerIdNull_ShouldThrowException() {
-        baseDTO.setOwnerId(null);
+        validCdto.setOwnerId(null);
 
-        assertThatThrownBy(() -> accommodationService.createAccommodation(baseDTO))
+        assertThatThrownBy(() -> accommodationService.createAccommodation(validCdto))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("owner");
 
+        verify(accommodationDAO, never()).save(validCdto);
+    }
+
+    @Test
+    @DisplayName("CREATE - Should throw exception when Accommodation is not saved")
+    void createAccommodation_NotSaved_ShouldThrowException() {
+        when(accommodationDAO.save(validCdto)).thenReturn(null);
+        assertThatThrownBy(() -> accommodationService.createAccommodation(validCdto))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("not saved");
+
+        verify(accommodationDAO, times(1)).save(validCdto);
     }
 //==================================== To test getAccommodationById method=====================================
     @Test
     @DisplayName("READ - Should return an existing Accommodation")
     void getAccommodationById_ValidId_ShouldReturnAccommodation() {
-        AccommodationDTO existing = new AccommodationDTO(
-                1L,
-                "Hoja",
-                "Best place ever",
-                validPrice,
-                5,
-                true,
-                1L
-        );
 
-        when(accommodationDAO.findById(validAccommodationId)).thenReturn(existing);
+        when(accommodationDAO.findById(validAccommodationId)).thenReturn(validAccommodationDTO);
 
         AccommodationDTO result = accommodationService.getAccommodationById(validAccommodationId);
 
         assertThat(result).isNotNull();
         assertThat(result.getId()).isEqualTo(validAccommodationId);
-        assertThat(result.getName()).isEqualTo("Hoja");
-        assertThat(result.getPrice()).isEqualByComparingTo(validPrice);
-        assertThat(result.getDescription()).isEqualTo("Best place ever");
-        assertThat(result.getOwnerId()).isEqualTo(validOwnerId);
 
         verify(accommodationDAO, times(1)).findById(validAccommodationId);
     }
@@ -174,6 +223,7 @@ public class AccommodationServiceTest {
         assertThatThrownBy(() -> accommodationService.getAccommodationById(null))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("id cannot be null");
+
         verify(accommodationDAO, never()).findById(null);
     }
 
@@ -196,42 +246,28 @@ public class AccommodationServiceTest {
     @Test
     @DisplayName("READ - Should throw exception when accommodation is not found")
     void getAccommodationById_NotFound_ShouldThrowException() {
-        Long nonExistentId = 999L;
-        when(accommodationDAO.findById(nonExistentId)).thenReturn(null);
 
-        assertThatThrownBy(() -> accommodationService.getAccommodationById(nonExistentId))
+        when(accommodationDAO.findById(validAccommodationId)).thenReturn(null);
+
+        assertThatThrownBy(() -> accommodationService.getAccommodationById(validAccommodationId))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("not found");
 
-        verify(accommodationDAO, times(1)).findById(nonExistentId);
+        verify(accommodationDAO, times(1)).findById(validAccommodationId);
     }
 
 //==================================== To test getAccommodationByName method=====================================
     @Test
     @DisplayName("READ - Should return an existing Accommodation")
     void getAccommodationByName_ValidName_ShouldReturnAccommodation() {
-        AccommodationDTO existing = new AccommodationDTO(
-                1L,
-                "Hoja",
-                "Best place ever",
-                validPrice,
-                5,
-                true,
-                1L
-        );
 
-        when(accommodationDAO.findByName(existing.getName())).thenReturn(existing);
-
-        AccommodationDTO result = accommodationService.getAccommodationByName(existing.getName());
+        when(accommodationDAO.findByName(validAccommodationDTO.getName())).thenReturn(validAccommodationDTO);
+        AccommodationDTO result = accommodationService.getAccommodationByName(validAccommodationDTO.getName());
 
         assertThat(result).isNotNull();
         assertThat(result.getId()).isEqualTo(validAccommodationId);
-        assertThat(result.getName()).isEqualTo("Hoja");
-        assertThat(result.getPrice()).isEqualByComparingTo(validPrice);
-        assertThat(result.getDescription()).isEqualTo("Best place ever");
-        assertThat(result.getOwnerId()).isEqualTo(validOwnerId);
 
-        verify(accommodationDAO, times(1)).findByName(existing.getName());
+        verify(accommodationDAO, times(1)).findByName(validAccommodationDTO.getName());
     }
 
     @Test
@@ -272,74 +308,33 @@ public class AccommodationServiceTest {
     @DisplayName("UPDATE - Should return updated Accommodation")
     void updateAccommodation_ValidData_ShouldReturnUpdatedAccommodation() {
 
-        AccommodationDTO existing = new AccommodationDTO(
-                1L,
-                "Hoja",
-                "Best place ever",
-                validPrice,
-                5,
-                true,
-                1L
-        );
+        when(accommodationDAO.findById(validAccommodationDTO.getId())).thenReturn(validAccommodationDTO);
+        when(accommodationMapper.dtoToEntity(validAccommodationDTO)).thenReturn(entity);
+        doNothing().when(accommodationMapper).updateEntityFromDto(validCupdatedDto, entity);
+        when(accommodationMapper.entityToCreateDTO(entity)).thenReturn(validCupdatedDto);
+        when(accommodationDAO.save(validCupdatedDto)).thenReturn(validUpdatedDTO);
 
-        String updatedName = "Agua";
-        AccommodationCreateDTO newData = new AccommodationCreateDTO(
-                updatedName,
-                "Best place ever",
-                validPrice,
-                5,
-                true,
-                1L
-        );
-
-        AccommodationDTO updated = new AccommodationDTO(
-                1L,
-                updatedName,
-                "Best place ever",
-                validPrice,
-                5,
-                true,
-                1L
-        );
-
-        AccommodationEntity entity = new AccommodationEntity();
-
-        entity.setId(existing.getId());
-        entity.setName(updatedName);
-        entity.setDescription("Best place ever");
-        entity.setPrice(validPrice);
-        entity.setMaxCapacity(5);
-        entity.setAvailable(true);
-        UserEntity user = new UserEntity();
-        user.setId(validOwnerId);
-        entity.setUser(user);
-
-        when(accommodationDAO.findById(existing.getId())).thenReturn(existing);
-        when(accommodationMapper.dtoToEntity(existing)).thenReturn(entity);
-        doNothing().when(accommodationMapper).updateEntityFromDto(newData, entity);
-        when(accommodationMapper.entityToCreateDTO(entity)).thenReturn(newData);
-        when(accommodationDAO.save(newData)).thenReturn(updated);
-
-        AccommodationDTO result = accommodationService.updateAccommodation(existing.getId(), newData);
+        AccommodationDTO result = accommodationService.updateAccommodation(validAccommodationDTO.getId(), validCupdatedDto);
 
         assertThat(result).isNotNull();
-        assertThat(result.getId()).isEqualTo(1L);
-        assertThat(result.getName()).isEqualTo(updatedName);
-        assertThat(result.getPrice()).isEqualByComparingTo(validPrice);
-        assertThat(result.getDescription()).isEqualTo("Best place ever");
-        assertThat(result.getOwnerId()).isEqualTo(1L);
+        assertThat(result.getId()).isEqualTo(validAccommodationDTO.getId());
 
-        verify(accommodationDAO, times(1)).save(newData);
+        verify(accommodationDAO, times(1)).findById(validAccommodationDTO.getId());
+        verify(accommodationMapper, times(1)).entityToCreateDTO(entity);
+        verify(accommodationMapper, times(1)).dtoToEntity(validAccommodationDTO);
+        verify(accommodationMapper, times(1)).updateEntityFromDto(validCupdatedDto, entity);
+        verify(accommodationDAO, times(1)).save(validCupdatedDto);
+
     }
 
     @Test
     @DisplayName("UPDATE - Should throw exception when id is null")
     void updateAccommodation_NullId_ShouldThrowException() {
-        assertThatThrownBy(() -> accommodationService.updateAccommodation(null, validAccommodationDTO))
+        assertThatThrownBy(() -> accommodationService.updateAccommodation(null, validCdto))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage("Accommodation id cannot be null");
 
-        verify(accommodationDAO, never()).save(validAccommodationDTO);
+        verify(accommodationDAO, never()).save(validCdto);
     }
 
     @Test
@@ -348,7 +343,7 @@ public class AccommodationServiceTest {
         assertThatThrownBy(() -> accommodationService.updateAccommodation(1L, null))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage("Accommodation data cannot be null");
-        verify(accommodationDAO, never()).save(validAccommodationDTO);
+        verify(accommodationDAO, never()).save(validCdto);
     }
 
     @Test
@@ -358,11 +353,32 @@ public class AccommodationServiceTest {
         when(accommodationDAO.findById(99L)).thenReturn(null);
         when(accommodationMapper.dtoToEntity(null)).thenReturn(null);
 
-        assertThatThrownBy(() -> accommodationService.updateAccommodation(99L, validAccommodationDTO))
+        assertThatThrownBy(() -> accommodationService.updateAccommodation(99L, validCdto))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage("Accommodation not found");
 
         verify(accommodationDAO, times(1)).findById(99L);
+    }
+
+    @Test
+    @DisplayName("UPDATE - Should throw exception when accommodation is not updated")
+    void updateAccommodation_NotUpdated_ShouldThrowException() {
+
+        when(accommodationDAO.findById(validAccommodationDTO.getId())).thenReturn(validAccommodationDTO);
+        when(accommodationMapper.dtoToEntity(validAccommodationDTO)).thenReturn(entity);
+        doNothing().when(accommodationMapper).updateEntityFromDto(validCupdatedDto, entity);
+        when(accommodationMapper.entityToCreateDTO(entity)).thenReturn(validCupdatedDto);
+        when(accommodationDAO.save(validCupdatedDto)).thenReturn(null);
+
+        assertThatThrownBy(() -> accommodationService.updateAccommodation(validAccommodationDTO.getId(), validCupdatedDto))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("Accommodation not updated");
+
+        verify(accommodationDAO, times(1)).findById(validAccommodationDTO.getId());
+        verify(accommodationMapper, times(1)).entityToCreateDTO(entity);
+        verify(accommodationMapper, times(1)).dtoToEntity(validAccommodationDTO);
+        verify(accommodationMapper, times(1)).updateEntityFromDto(validCupdatedDto, entity);
+        verify(accommodationDAO, times(1)).save(validCupdatedDto);
     }
 
 //==================================== To test getAllAccommodations method=====================================
@@ -370,25 +386,6 @@ public class AccommodationServiceTest {
     @Test
     @DisplayName("READ - Should return a list with all Accommodations")
     void getAllAccommodations_ShouldReturnAllAccommodations() {
-        List<AccommodationDTO> accommodations = new ArrayList<>();
-        AccommodationDTO existing1 = new AccommodationDTO(
-                1L,
-                "Hoja",
-                "Best place ever",
-                validPrice,
-                5,
-                true,
-                1L);
-        AccommodationDTO existing2 = new AccommodationDTO(
-                2L,
-                "Agua",
-                "Worst place ever",
-                validPrice,
-                5,
-                true,
-                1L);
-        accommodations.add(existing1);
-        accommodations.add(existing2);
 
         when(accommodationDAO.getAllAccommodations()).thenReturn(accommodations);
         List<AccommodationDTO> result = accommodationService.getAllAccommodations();
@@ -416,19 +413,12 @@ public class AccommodationServiceTest {
     @Test
     @DisplayName("DELETE - Should delete an existing Accommodation by ID")
     void deleteAccommodation_ValidId_ShouldDeleteAccommodation() {
-        AccommodationDTO existing = new AccommodationDTO(
-                1L,
-                "Hoja",
-                "Best place ever",
-                validPrice,
-                5,
-                true,
-                1L);
-        when(accommodationDAO.findById(existing.getId())).thenReturn(existing);
-        accommodationService.deleteAccommodation(existing.getId());
 
-        verify(accommodationDAO, times(1)).findById(existing.getId());
-        verify(accommodationDAO, times(1)).deleteAccommodation(existing.getId());
+        when(accommodationDAO.findById(validAccommodationDTO.getId())).thenReturn(validAccommodationDTO);
+        accommodationService.deleteAccommodation(validAccommodationDTO.getId());
+
+        verify(accommodationDAO, times(1)).findById(validAccommodationDTO.getId());
+        verify(accommodationDAO, times(1)).deleteAccommodation(validAccommodationDTO.getId());
     }
 
     @Test
@@ -449,26 +439,14 @@ public class AccommodationServiceTest {
     @DisplayName("CREATE - Should return an existing Accommodation by id")
     void assignServicesToAccommodation_ValidData_ShouldCreateAccommodation() {
 
-        AccommodationDTO existing = new AccommodationDTO(
-                1L,
-                "Hoja",
-                "Best place ever",
-                validPrice,
-                5,
-                true,
-                1L);
-
-        List<Long> serviceIds = new ArrayList<>();
-        serviceIds.add(1L);
-        serviceIds.add(2L);
-        serviceIds.add(3L);
-
-        when(accommodationDAO.setServicesToAccommodation(validAccommodationId, serviceIds)).thenReturn(existing);
+        when(accommodationDAO.findById(validAccommodationDTO.getId())).thenReturn(validAccommodationDTO);
+        when(accommodationDAO.setServicesToAccommodation(validAccommodationId, serviceIds)).thenReturn(validAccommodationDTO);
         AccommodationDTO result = accommodationService.assignServicesToAccommodation(validAccommodationId, serviceIds);
 
         assertThat(result).isNotNull();
-        assertThat(result).isEqualTo(existing);
+        assertThat(result).isEqualTo(validAccommodationDTO);
 
+        verify(accommodationDAO, times(1)).findById(validAccommodationDTO.getId());
         verify(accommodationDAO, times(1)).setServicesToAccommodation(validAccommodationId, serviceIds);
 
     }
@@ -476,10 +454,7 @@ public class AccommodationServiceTest {
     @Test
     @DisplayName("CREATE - Should throw exception when id is null")
     void  assignServicesToAccommodation_IdNull_ShouldThrowException() {
-        List<Long> serviceIds = new ArrayList<>();
-        serviceIds.add(1L);
-        serviceIds.add(2L);
-        serviceIds.add(3L);
+
         assertThatThrownBy(() -> accommodationService.assignServicesToAccommodation(null, serviceIds))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage("Accommodation id cannot be null");
@@ -496,32 +471,46 @@ public class AccommodationServiceTest {
 
         verify(accommodationDAO, never()).setServicesToAccommodation(null, null);
     }
+    @Test
+    @DisplayName("CREATE - Should throw exception when Accommodation cannot be found")
+    void assignServicesToAccommodation_AccommodationNotFound_ShouldThrowException() {
+        when(accommodationDAO.findById(validAccommodationDTO.getId())).thenReturn(null);
+        assertThatThrownBy(() -> accommodationService.assignServicesToAccommodation(validAccommodationDTO.getId(), serviceIds)).
+                isInstanceOf(IllegalArgumentException.class).
+                hasMessage("Accommodation not found");
+
+        verify(accommodationDAO, times(1)).findById(validAccommodationDTO.getId());
+        verify(accommodationDAO, never()).setServicesToAccommodation(null, serviceIds);
+    }
+
+    @Test
+    @DisplayName("CREATE - Should throw exception when services cannot be assigned")
+    void assignServicesToAccommodation_NotAssigned_ShouldThrowException() {
+
+        when(accommodationDAO.findById(validAccommodationDTO.getId())).thenReturn(validAccommodationDTO);
+        when(accommodationDAO.setServicesToAccommodation(validAccommodationDTO.getId(), serviceIds)).thenReturn(null);
+        assertThatThrownBy(() -> accommodationService.assignServicesToAccommodation(validAccommodationDTO.getId(), serviceIds)).
+                isInstanceOf(IllegalArgumentException.class).
+                hasMessage("Accommodation services not saved");
+
+        verify(accommodationDAO, times(1)).findById(validAccommodationDTO.getId());
+        verify(accommodationDAO, never()).setServicesToAccommodation(null, serviceIds);
+    }
 
 //==================================== To test saveImagesForAccommodation method=====================================
 
     @Test
     @DisplayName("CREATE - Should return an AccommodationImagesDTOs list")
     void saveImagesForAccommodation_ValidData_ShouldReturnImages() {
-        List<AccommodationImagesDTO> images = new ArrayList<>();
-        AccommodationImagesDTO existing = new AccommodationImagesDTO(
-                1L,
-                "https://holaxd",
-                1L
-        );
-        AccommodationImagesDTO existing2 = new AccommodationImagesDTO(
-                2L,
-                "https://holaxd",
-                1L
-        );
-        images.add(existing);
-        images.add(existing2);
 
+        when(accommodationDAO.findById(validAccommodationDTO.getId())).thenReturn(validAccommodationDTO);
         when(accommodationImagesDAO.save(images)).thenReturn(images);
         List<AccommodationImagesDTO> result = accommodationService.saveImagesForAccommodation(images);
 
         assertThat(result).isNotNull();
         assertThat(result).isEqualTo(images);
 
+        verify(accommodationDAO, times(1)).findById(validAccommodationDTO.getId());
         verify(accommodationImagesDAO, times(1)).save(images);
 
     }
@@ -549,41 +538,36 @@ public class AccommodationServiceTest {
         verify(accommodationImagesDAO, never()).save(images);
     }
 
+    @Test
+    @DisplayName("CREATE - Should throw exception when images list is not saved")
+    void saveImagesForAccommodation_ImagesNotSaved_ShouldThrowException() {
+
+        when(accommodationDAO.findById(validAccommodationDTO.getId())).thenReturn(validAccommodationDTO);
+        when(accommodationImagesDAO.save(images)).thenReturn(null);
+        assertThatThrownBy(() -> accommodationService.saveImagesForAccommodation(images))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("Accommodation images not saved");
+
+        verify(accommodationDAO, times(1)).findById(validAccommodationDTO.getId());
+        verify(accommodationImagesDAO, times(1)).save(images);
+    }
+
 //==================================== To test getAllAccommodationImages method=====================================
 
     @Test
     @DisplayName("READ -  Should return Accommodations images by ID")
     void getImagesById_ValidData_ShouldReturnImages() {
-        AccommodationDTO existingAccommodation = new AccommodationDTO(
-                1L,
-                "Hoja",
-                "Best place ever",
-                validPrice,
-                5,
-                true,
-                1L);
 
-        List<AccommodationImagesDTO> images = new ArrayList<>();
-        AccommodationImagesDTO existing = new AccommodationImagesDTO(
-                1L,
-                "https://holaxd",
-                1L
-        );
-        AccommodationImagesDTO existing2 = new AccommodationImagesDTO(
-                2L,
-                "https://holaxd",
-                1L
-        );
-        images.add(existing);
-        images.add(existing2);
 
-        when(accommodationDAO.findById(1L)).thenReturn(existingAccommodation);
-        when(accommodationImagesDAO.findAllByAccommodationId(1L)).thenReturn(images);
-        List<AccommodationImagesDTO> result = accommodationService.getAllAccommodationImages(1L);
+        when(accommodationDAO.findById(validAccommodationId)).thenReturn(validAccommodationDTO);
+        when(accommodationImagesDAO.findAllByAccommodationId(validAccommodationId)).thenReturn(images);
+
+        List<AccommodationImagesDTO> result = accommodationService.getAllAccommodationImages(validAccommodationId);
         assertThat(result).isNotNull();
         assertThat(result).isEqualTo(images);
 
-        verify(accommodationImagesDAO, times(1)).findAllByAccommodationId(1L);
+        verify(accommodationDAO, times(1)).findById(validAccommodationId);
+        verify(accommodationImagesDAO, times(1)).findAllByAccommodationId(validAccommodationId);
 
     }
 
@@ -622,5 +606,18 @@ public class AccommodationServiceTest {
         verify(accommodationImagesDAO, never()).findAllByAccommodationId(any());
     }
 
+    @Test
+    @DisplayName("READ - Should throw exception when accommodation images cannot be found")
+    void getAllAccommodationImages_ImagesNotFound_ShouldThrowException() {
 
+        when(accommodationDAO.findById(validAccommodationId)).thenReturn(validAccommodationDTO);
+        when(accommodationImagesDAO.findAllByAccommodationId(validAccommodationId)).thenReturn(null);
+
+        assertThatThrownBy(() -> accommodationService.getAllAccommodationImages(validAccommodationId))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("Accommodation images not found");
+
+        verify(accommodationDAO, times(1)).findById(validAccommodationId);
+        verify(accommodationImagesDAO, times(1)).findAllByAccommodationId(validAccommodationId);
+    }
 }

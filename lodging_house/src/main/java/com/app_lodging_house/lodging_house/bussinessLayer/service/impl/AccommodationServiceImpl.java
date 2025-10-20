@@ -42,6 +42,9 @@ public class AccommodationServiceImpl implements AccommodationService {
             throw new IllegalArgumentException("Accommodation must have an owner ID");
         }
         AccommodationDTO accommodationCreated = accommodationDAO.save(dto);
+        if(accommodationCreated==null){
+            throw new IllegalArgumentException("Accommodation not saved");
+        }
         return accommodationCreated;
     }
 
@@ -87,6 +90,9 @@ public class AccommodationServiceImpl implements AccommodationService {
         }
         accommodationMapper.updateEntityFromDto(dto, existing);
         AccommodationDTO updated = accommodationDAO.save(accommodationMapper.entityToCreateDTO(existing));
+        if(updated==null){
+            throw new IllegalArgumentException("Accommodation not updated");
+        }
         return updated;
     }
 
@@ -116,7 +122,14 @@ public class AccommodationServiceImpl implements AccommodationService {
         if(serviceIds == null || serviceIds.isEmpty()) {
             throw new IllegalArgumentException("Accommodation service IDs cannot be null or blank");
         }
+        if(accommodationDAO.findById(id) == null) {
+            throw new IllegalArgumentException("Accommodation not found");
+        }
         AccommodationDTO accommodationDTO = accommodationDAO.setServicesToAccommodation(id, serviceIds);
+
+        if(accommodationDTO == null) {
+            throw new IllegalArgumentException("Accommodation services not saved");
+        }
         return accommodationDTO;
     }
 
@@ -128,7 +141,13 @@ public class AccommodationServiceImpl implements AccommodationService {
         if(images.isEmpty()) {
             throw new IllegalArgumentException("Accommodation images cannot be empty");
         }
+        if(accommodationDAO.findById(images.get(0).getId()) == null) {
+            throw new IllegalArgumentException("Accommodation not found");
+        }
         List<AccommodationImagesDTO> imagesSaved = accommodationImagesDAO.save(images);
+        if(imagesSaved == null) {
+            throw new IllegalArgumentException("Accommodation images not saved");
+        }
         return imagesSaved;
     }
 
@@ -147,6 +166,9 @@ public class AccommodationServiceImpl implements AccommodationService {
         }
 
         List<AccommodationImagesDTO> images = accommodationImagesDAO.findAllByAccommodationId(id);
+        if(images == null) {
+            throw new IllegalArgumentException("Accommodation images not found");
+        }
         return images;
     }
 }
