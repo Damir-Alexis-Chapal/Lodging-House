@@ -7,6 +7,7 @@ import com.app_lodging_house.lodging_house.persistenceLayer.entity.UserEntity;
 import com.app_lodging_house.lodging_house.persistenceLayer.mapper.UserMapper;
 import com.app_lodging_house.lodging_house.persistenceLayer.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Repository;
 import java.util.ArrayList;
 import java.util.List;
@@ -17,6 +18,7 @@ import java.util.Optional;
 public class UserDAO {
     private final UserRepository userRepository;
     private final UserMapper userMapper;
+    private final PasswordEncoder passwordEncoder;
 
     public UserDTO save(UserCreateDTO cDto) {
         UserEntity entity = userMapper.toEntity(cDto);
@@ -24,6 +26,10 @@ public class UserDAO {
         RoleEntity role = new RoleEntity();
         role.setId(1L);
         entity.setRole(role);
+
+        String password = cDto.getPassword();
+        String encriptedPassword = passwordEncoder.encode(password);
+        entity.setPassword(encriptedPassword);
 
         UserEntity savedUser = userRepository.save(entity);
         return userMapper.toDTO(savedUser);

@@ -4,6 +4,8 @@ import com.app_lodging_house.lodging_house.bussinessLayer.dto.UserCreateDTO;
 import com.app_lodging_house.lodging_house.bussinessLayer.dto.UserDTO;
 import com.app_lodging_house.lodging_house.bussinessLayer.service.impl.UserServiceImpl;
 import com.app_lodging_house.lodging_house.persistenceLayer.dao.UserDAO;
+import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -11,6 +13,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.crypto.password.PasswordEncoder;
+
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -19,7 +23,7 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
-@DisplayName("ReviewService - Unit Tests")
+@DisplayName("UserService - Unit Tests")
 public class UserServiceTest {
 
     @Mock
@@ -36,16 +40,20 @@ public class UserServiceTest {
     private Long validUserId;
     private LocalDate validDate;
     private List<UserDTO> userDTOS;
+    private final PasswordEncoder passwordEncoder = new org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder();
+
+    private String securePassword;
     @BeforeEach
     void setUp() {
         validDate = LocalDate.parse("2025-10-10");
         validUserId = 1L;
+        securePassword = passwordEncoder.encode("aksjhas");
 
         validUserDTO = new UserDTO(
                 validUserId,
                 "Alexis",
                 "Alexis@gmail.com",
-                "aksjhas",
+                securePassword,
                 "3124887186",
                 validDate,
                 "https://personajes-de-ficcion-",
@@ -74,7 +82,7 @@ public class UserServiceTest {
                 validUserId,
                 "Alexis chapal",
                 "Alexis@gmail.com",
-                "aksjhas",
+                securePassword,
                 "3124887186",
                 validDate,
                 "https://personajes-de-ficcion-",

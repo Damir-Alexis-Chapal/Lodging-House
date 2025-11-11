@@ -14,8 +14,6 @@ import org.springframework.web.bind.annotation.*;
 @Tag(name = "Passwords", description = "Operations related to passwords management")
 // ↑ This will gather all endpoints in this class as "Passwords" in Swagger
 public class PasswordController {
-    //All endpoints return a String ResponseEntity, I made it like this since those endpoints have
-    //not the real logic and are just examples
     //------------------------------------------------------------------------------------------------------------------
     /* Response codes used in this controller
     200 OK → operation successful.

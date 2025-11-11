@@ -24,8 +24,6 @@ import java.util.Map;
 @Tag(name = "Bookings", description = "Operations related to booking management")
 // ↑ This will gather all endpoints in this class as "Bookings" in Swagger
 public class BookingController {
-    //All endpoints return a String ResponseEntity, I made it like this since those endpoints have
-    //not the real logic and are just examples
     //------------------------------------------------------------------------------------------------------------------
     /* Response codes used in this controller
     201 Created → booking created successfully.

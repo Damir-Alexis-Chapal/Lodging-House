@@ -26,8 +26,6 @@ import java.util.Map;
 @Tag(name = "Users", description = "Operations related to users management")
 // ↑ This will gather all endpoints in this class as "Users" in Swagger
 public class UserController {
-    //All endpoints return a String ResponseEntity, I made it like this since those endpoints have
-    //not the real logic and are just examples
     //------------------------------------------------------------------------------------------------------------------
     /* Response codes used in this controller
     201 Created → When a user was created.

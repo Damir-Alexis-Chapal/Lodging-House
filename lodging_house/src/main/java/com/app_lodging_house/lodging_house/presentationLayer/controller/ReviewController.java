@@ -25,8 +25,6 @@ import java.util.Map;
 @Tag(name = "Reviews", description = "Operations related to reviews management")
 // ↑ This will gather all endpoints in this class as "Reviews" in Swagger
 public class ReviewController {
-    //All endpoints return a String ResponseEntity, I made it like this since those endpoints have
-    //not the real logic and are just examples
     //------------------------------------------------------------------------------------------------------------------
     /* Response codes used in this controller
     201 Created → when creating a review.
