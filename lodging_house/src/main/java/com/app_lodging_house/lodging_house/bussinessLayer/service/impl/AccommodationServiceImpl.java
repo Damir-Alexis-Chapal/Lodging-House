@@ -171,5 +171,10 @@ public class AccommodationServiceImpl implements AccommodationService {
         }
         return images;
     }
+
+    @Override
+    public List<AccommodationDTO> filterAccommodations(Double minPrice, Double maxPrice, String city, List<String> services){
+        return accommodationDAO.filterAccommodations(minPrice, maxPrice, city, services);
+    }
 }
 

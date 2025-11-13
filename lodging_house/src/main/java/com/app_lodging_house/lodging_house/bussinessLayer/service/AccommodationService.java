@@ -25,4 +25,6 @@ public interface AccommodationService {
     List<AccommodationImagesDTO> saveImagesForAccommodation(List<AccommodationImagesDTO> images);
     //To get all accommodation images
     List<AccommodationImagesDTO> getAllAccommodationImages(Long id);
+    //To filter
+    List<AccommodationDTO> filterAccommodations(Double minPrice, Double maxPrice, String city, List<String> services);
 }

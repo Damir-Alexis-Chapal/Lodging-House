@@ -179,18 +179,56 @@ public class AccommodationController {
     // ENDPOINT 6: FILTER by price range or guests (it's just an example, we will add some more filter options later)
     @Operation(summary = "Filter accommodations by price and number of guests")
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Filtered results returned"),
-            @ApiResponse(responseCode = "404", description = "No accommodations match the filter"),
-            @ApiResponse(responseCode = "500", description = "Internal server error")
+            @ApiResponse(responseCode = "200", description = "Filtered results returned successfully"),
+            @ApiResponse(responseCode = "404", description = "No accommodations match the provided filters"),
+            @ApiResponse(responseCode = "400", description = "Invalid filter parameters supplied"),
+            @ApiResponse(responseCode = "500", description = "Internal server error occurred")
     })
     @GetMapping("/filter")
-    public ResponseEntity<String> filterAccommodations(
+    public ResponseEntity<?> filterAccommodations(
             @Parameter(description = "Minimum price", example = "50") @RequestParam(required = false) Double minPrice,
             @Parameter(description = "Maximum price", example = "200") @RequestParam(required = false) Double maxPrice,
-            @Parameter(description = "Minimum guests", example = "2") @RequestParam(required = false) Integer minGuests,
-            @Parameter(description = "Maximum guests", example = "6") @RequestParam(required = false) Integer maxGuests) {
-        //This is just an example,it's not the real logic
-        return new ResponseEntity<>("Filtered results returned", HttpStatus.OK);
+            @Parameter(description = "City", example = "armenia") @RequestParam(required = false) String city,
+            @Parameter(description = "Services", example = "wifi, piscina") @RequestParam(required = false) List<String> services) {
+        try {
+            if (minPrice != null && maxPrice != null && minPrice > maxPrice) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of(
+                        "status", 400,
+                        "error", "Bad Request",
+                        "message", "Minimum price cannot be greater than maximum price"
+                ));
+            }
+            System.out.println(minPrice + " " + maxPrice + " " + city + " " + services);
+            List<AccommodationDTO> results = accommodationService.filterAccommodations(minPrice, maxPrice, city, services);
+
+            if (results.isEmpty()) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of(
+                        "status", 404,
+                        "error", "Not Found",
+                        "message", "No accommodations match the provided filters"
+                ));
+            }
+
+            return ResponseEntity.ok(results);
+
+        } catch (IllegalArgumentException e) {
+            // Usar mensaje por defecto si e.getMessage() es null
+            String errorMessage = e.getMessage() != null ? e.getMessage() : "Invalid request parameters";
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of(
+                    "status", 400,
+                    "error", "Bad Request",
+                    "message", errorMessage
+            ));
+
+        } catch (Exception e) {
+            // Usar mensaje por defecto si e.getMessage() es null
+            String errorMessage = e.getMessage() != null ? e.getMessage() : "An unexpected error occurred";
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of(
+                    "status", 500,
+                    "error", "Internal Server Error",
+                    "message", errorMessage
+            ));
+        }
     }
     //------------------------------------------------------------------------------------------------------------------
     // ENDPOINT 7: DELETE

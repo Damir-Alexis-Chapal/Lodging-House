@@ -11,6 +11,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Repository
 @RequiredArgsConstructor
@@ -59,6 +60,51 @@ public class AccommodationDAO {
         AccommodationEntity saved = accommodationRepository.save(accommodation);
 
         return accommodationMapper.toDTO(saved);
+    }
+
+    public List<AccommodationDTO> filterAccommodations(Double minPrice, Double maxPrice, String city, List<String> services) {
+        try {
+            List<AccommodationEntity> result = new ArrayList<>();
+            boolean firstFilter = true;
+            if (minPrice != null || maxPrice != null) {
+                result = accommodationRepository.findByPriceRange(minPrice, maxPrice);
+                firstFilter = false;
+            }
+            if (city != null && !city.trim().isEmpty()) {
+                List<AccommodationEntity> byCity = accommodationRepository.findByCity(city.toLowerCase());
+                if (firstFilter) {
+                    result = byCity;
+                    firstFilter = false;
+                } else {
+                    result.retainAll(byCity);
+                }
+            }
+            if (services != null && !services.isEmpty()) {
+                List<String> lowerServices = services.stream()
+                        .map(String::trim)
+                        .map(String::toLowerCase)
+                        .collect(Collectors.toList());
+                List<AccommodationEntity> byServices = accommodationRepository.findByServices(lowerServices);
+                if (firstFilter) {
+                    result = byServices;
+                    firstFilter = false;
+                } else {
+                    result.retainAll(byServices);
+                }
+            }
+            if (firstFilter) {
+                result = accommodationRepository.findAll();
+            }
+            if (result.isEmpty()) {
+                return Collections.emptyList();
+            }
+            return result.stream()
+                    .map(accommodationMapper::toDTO)
+                    .collect(Collectors.toList());
+        } catch (Exception e) {
+            throw new IllegalArgumentException("Error filtering accommodations: " +
+                    (e.getMessage() != null ? e.getMessage() : "Unknown error"), e);
+        }
     }
 
 
