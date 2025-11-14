@@ -1,22 +1,20 @@
-
+# Etapa de construcción
 FROM gradle:8.5-jdk21 AS build
 
-# Copiamos el código al contenedor
-WORKDIR /app_lodging_house
-COPY . .
+WORKDIR /app
+COPY build.gradle settings.gradle ./
+COPY src ./src
 
-# Compilamos el proyecto sin tests
 RUN gradle clean build -x test
 
-# Imagen final
-FROM eclipse-temurin:21-jdk-alpine
-WORKDIR /app_lodging_house
+# Etapa final (sin Alpine para evitar problemas)
+FROM eclipse-temurin:21-jdk
 
-# Copiamos el JAR compilado desde la imagen anterior
-COPY --from=build /app_lodging_house/build/libs/*.jar app.jar
+WORKDIR /app
 
-# Puerto donde escucha Spring Boot
+# Copiamos el JAR desde la fase de build
+COPY --from=build /app/build/libs/*.jar app.jar
+
 EXPOSE 8080
 
-# Comando para ejecutar la app
 ENTRYPOINT ["java", "-jar", "app.jar"]

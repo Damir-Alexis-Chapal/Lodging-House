@@ -1,0 +1,11 @@
+.git
+.gradle
+build
+out
+.vscode
+.idea
+**/*.iml
+*.md
+Dockerfile
+docker-compose.yml
+src/main/resources/docker
