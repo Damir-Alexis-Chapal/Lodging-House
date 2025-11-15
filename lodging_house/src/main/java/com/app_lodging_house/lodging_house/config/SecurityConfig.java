@@ -28,8 +28,8 @@ public class SecurityConfig {
                         .requestMatchers("/api/v1/auth/**").permitAll()
                         .requestMatchers("/api/v1/uploads/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/v1/users").permitAll()
-                        .requestMatchers("/health").permitAll()           // ← AGREGAR
-                        .requestMatchers("/").permitAll()                 // ← AGREGAR
+                        .requestMatchers("/health").permitAll()
+                        .requestMatchers("/").permitAll()
                         .requestMatchers("/error").permitAll()
                         .anyRequest().authenticated()
                 )
