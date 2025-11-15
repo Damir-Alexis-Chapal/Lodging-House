@@ -104,8 +104,9 @@ public class AuthController {
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
     @GetMapping("/me")
-    public ResponseEntity<?> getCurrentUser(@RequestParam String token) {
+    public ResponseEntity<?> getCurrentUser(@RequestHeader("Authorization") String authHeader) {
         try {
+            String token = authHeader.replace("Bearer ", "");
             UserDTO user = authService.getCurrentUser(token);
             return ResponseEntity.ok(user);
         } catch (JwtException e) {
