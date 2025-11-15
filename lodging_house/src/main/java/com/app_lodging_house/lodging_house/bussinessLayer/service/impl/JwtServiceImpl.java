@@ -15,7 +15,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
-import java.security.Key;
+import javax.crypto.SecretKey;
 import java.util.Base64;
 import java.util.Date;
 import java.util.function.Function;
@@ -31,7 +31,7 @@ public class JwtServiceImpl implements JwtService {
     private static final long ACCESS_TOKEN_EXPIRATION = 1000 * 60 * 60;
     private static final long REFRESH_TOKEN_EXPIRATION = 1000L * 60 * 60 * 24 * 7;
 
-    private Key getSigningKey() {
+    private SecretKey getSigningKey() {
         byte[] keyBytes = Base64.getDecoder().decode(secretKey);
         return Keys.hmacShaKeyFor(keyBytes);
     }
@@ -42,7 +42,7 @@ public class JwtServiceImpl implements JwtService {
                 .subject(user.getEmail())
                 .issuedAt(new Date())
                 .expiration(new Date(System.currentTimeMillis() + ACCESS_TOKEN_EXPIRATION))
-                .signWith(getSigningKey())
+                .signWith(getSigningKey(), Jwts.SIG.HS256)
                 .compact();
     }
 
@@ -51,26 +51,25 @@ public class JwtServiceImpl implements JwtService {
                 .subject(user.getEmail())
                 .issuedAt(new Date())
                 .expiration(new Date(System.currentTimeMillis() + REFRESH_TOKEN_EXPIRATION))
-                .signWith(getSigningKey())
+                .signWith(getSigningKey(), Jwts.SIG.HS256)
                 .compact();
     }
 
     @Override
     public String extractEmail(String token) {
         Claims claims = Jwts.parser()
-                .setSigningKey(getSigningKey())
+                .verifyWith(getSigningKey())
                 .build()
                 .parseSignedClaims(token)
                 .getPayload();
 
         return claims.getSubject();
     }
-
     @Override
     public boolean isTokenValid(String token) {
         try {
             Jwts.parser()
-                    .setSigningKey(getSigningKey())
+                    .verifyWith(getSigningKey())
                     .build()
                     .parseSignedClaims(token);
             return true;
@@ -103,7 +102,7 @@ public class JwtServiceImpl implements JwtService {
             return extractExpiration(token).before(new Date());
         } catch (JwtException e) {
             log.error("Error checking token expiration: {}", e.getMessage());
-            return true; // Si hay error, consideramos el token como expirado
+            return true;
         }
     }
     private Date extractExpiration(String token) {
@@ -112,7 +111,7 @@ public class JwtServiceImpl implements JwtService {
     private <T> T extractClaim(String token, Function<Claims, T> claimsResolver) {
         try {
             final Claims claims = Jwts.parser()
-                    .setSigningKey(getSigningKey())
+                    .verifyWith(getSigningKey())
                     .build()
                     .parseSignedClaims(token)
                     .getPayload();
@@ -127,7 +126,7 @@ public class JwtServiceImpl implements JwtService {
     public String refreshToken(String refreshToken) {
         try {
             Claims claims = Jwts.parser()
-                    .setSigningKey(getSigningKey())
+                    .verifyWith(getSigningKey())
                     .build()
                     .parseSignedClaims(refreshToken)
                     .getPayload();
@@ -142,7 +141,7 @@ public class JwtServiceImpl implements JwtService {
                     .subject(email)
                     .issuedAt(new Date())
                     .expiration(new Date(System.currentTimeMillis() + ACCESS_TOKEN_EXPIRATION))
-                    .signWith(getSigningKey())
+                    .signWith(getSigningKey(), Jwts.SIG.HS256)
                     .compact();
 
         } catch (JwtException e) {
