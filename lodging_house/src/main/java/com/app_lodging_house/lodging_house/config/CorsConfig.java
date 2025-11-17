@@ -20,7 +20,9 @@ public class CorsConfig {
                 "http://localhost:4200",
                 "http://localhost:5173",
                 "https://lodging-house.onrender.com",
-                "https://*.render.com"
+                "https://*.render.com",
+                "https://damir-alexis-chapal.github.io",
+                "https://*.github.io"
         ));
         corsConfiguration.setAllowedHeaders(Arrays.asList(
                 "Origin", "Access-Control-Allow-Origin", "Content-Type",
